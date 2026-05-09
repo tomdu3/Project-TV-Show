@@ -11,7 +11,15 @@ function makePageForEpisodes(episodeList) {
   episodeList.forEach((episode) => {
     // create paragraph and add episode name to it, and append to root element
     const paragraph = document.createElement("p");
-    paragraph.textContent = episode.name;
+
+    // pad the season and episode numbers with leading zeros
+    const paddedSeason = episode.season.toString().padStart(2, "0");
+    const paddedEpisode = episode.number.toString().padStart(2, "0");
+    const episodeCode = `S${paddedSeason}E${paddedEpisode}`;
+
+    // combine the episode code and the name
+    paragraph.textContent = `${episodeCode} - ${episode.name}`;
+
     rootElem.appendChild(paragraph);
   });
 }
