@@ -6,7 +6,14 @@ function setup() {
 
 function makePageForEpisodes(episodeList) {
   const rootElem = document.getElementById("root");
-  rootElem.textContent = `Got ${episodeList.length} episode(s)`;
+
+  // Loop through each episode in the list
+  episodeList.forEach((episode) => {
+    // create paragraph and add episode name to it, and append to root element
+    const paragraph = document.createElement("p");
+    paragraph.textContent = episode.name;
+    rootElem.appendChild(paragraph);
+  });
 }
 
 window.onload = setup;
