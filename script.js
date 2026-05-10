@@ -3,7 +3,7 @@ const elements = {
     episodesContainer: document.getElementById("root"),
 
     episodeSelector: document.getElementById("episode-selector"),
-    epSearch: document.getElementById("episode-Search"),
+    episodeSearch: document.getElementById("episode-search"),
 };
 
 function setup() {
@@ -12,6 +12,7 @@ function setup() {
     populateEpisodeSelector(allEpisodes);
 
     initEpisodeSelectListener(allEpisodes);
+    initSearchEpisodes(allEpisodes);
 }
 
 function makePageForEpisodes(episodeList) {
@@ -91,6 +92,25 @@ function initEpisodeSelectListener(episodeList) {
 
             makePageForEpisodes(filtered);
         }
+    };
+}
+
+function initSearchEpisodes(episodeList) {
+    elements.episodeSearch.oninput = (e) => {
+        const searchStr = e.target.value.toLowerCase();
+        const filtered = episodeList.filter(
+            (ep) =>
+                ep.name.toLowerCase().includes(searchStr) ||
+                ep.summary.toLowerCase().includes(searchStr),
+        );
+
+        while (elements.episodesContainer.firstChild) {
+            elements.episodesContainer.removeChild(
+                elements.episodesContainer.firstChild,
+            );
+        }
+
+        makePageForEpisodes(filtered);
     };
 }
 window.onload = setup;
