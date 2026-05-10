@@ -1,4 +1,9 @@
-//You can edit ALL of the code here
+// store frequently accessed elements
+const elements = {
+    episodeSelector: document.getElementById("episode-selector"),
+    epSearch: document.getElementById("episode-Search"),
+};
+
 function setup() {
     const allEpisodes = getAllEpisodes();
     makePageForEpisodes(allEpisodes);
@@ -45,7 +50,6 @@ function makePageForEpisodes(episodeList) {
 }
 
 function populateEpisodeSelector(episodeList) {
-    const epSelector = document.getElementById("episode-selector");
     console.log(epSelector);
     const defaultOpt = document.createElement("option");
     defaultOpt.selected = true;
@@ -60,7 +64,7 @@ function populateEpisodeSelector(episodeList) {
         return opt;
     });
 
-    epSelector.replaceChildren(defaultOpt, ...episodeOpts);
+    elements.episodeSelector.replaceChildren(defaultOpt, ...episodeOpts);
 }
 
 window.onload = setup;
