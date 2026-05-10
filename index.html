@@ -18,7 +18,16 @@
             <h1>Tv Show Project</h1>
         </header>
         <main>
-            <section id="menu"></section>
+            <section id="menu">
+                <select name="show-selector" id="show-selector"></select>
+                <div id="show-container">
+                    <label for="show-search">Search Shows: </label>
+                    <input type="search" name="show-search" id="show-search" />
+                    <!-- the polite attribute stops text to voice software 
+                     spamming as the show count is updated rapidly -->
+                    <span id="show-count" aria-live="polite"></span>
+                </div>
+            </section>
             <section id="root"></section>
         </main>
 
