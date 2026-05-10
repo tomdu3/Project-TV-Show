@@ -9,18 +9,37 @@ function makePageForEpisodes(episodeList) {
 
   // Loop through each episode in the list
   episodeList.forEach((episode) => {
-    // create paragraph and add episode name to it, and append to root element
-    const paragraph = document.createElement("p");
+    // create a div to hold the episode details
+    const episodeDiv = document.createElement("div");
+    episodeDiv.classList.add("episode-card");
 
     // pad the season and episode numbers with leading zeros
     const paddedSeason = episode.season.toString().padStart(2, "0");
     const paddedEpisode = episode.number.toString().padStart(2, "0");
     const episodeCode = `S${paddedSeason}E${paddedEpisode}`;
 
-    // combine the episode code and the name
-    paragraph.textContent = `${episodeCode} - ${episode.name}`;
+    // create header with episode name and code
+    const title = document.createElement("h2");
+    title.classList.add("episode-title");
+    title.textContent = `${episode.name} - ${episodeCode}`;
+    episodeDiv.appendChild(title);
 
-    rootElem.appendChild(paragraph);
+    // create image element for medium-sized image
+    if (episode.image && episode.image.medium) {
+      const image = document.createElement("img");
+      image.classList.add("episode-image");
+      image.src = episode.image.medium;
+      episodeDiv.appendChild(image);
+    }
+
+    // create element for summary text
+    const summary = document.createElement("div");
+    summary.classList.add("episode-summary");
+    summary.innerHTML = episode.summary;
+    episodeDiv.appendChild(summary);
+
+    // append the episode div to root element
+    rootElem.appendChild(episodeDiv);
   });
 }
 
