@@ -21,11 +21,14 @@
             <section id="menu">
                 <select name="episode-selector" id="episode-selector"></select>
                 <div id="search-container">
-                    <label for="show-search">Search Shows: </label>
-                    <input type="search" name="show-search" id="show-search" />
+                    <label for="episode-search">Search Shows: </label>
+                    <input
+                        type="search"
+                        name="episode-search"
+                        id="episode-search" />
                     <!-- the polite attribute stops text to voice software 
-                     spamming as the show count is updated rapidly -->
-                    <span id="show-count" aria-live="polite"></span>
+                     spamming as the episode count is updated rapidly -->
+                    <span id="episode-count" aria-live="polite"></span>
                 </div>
             </section>
             <section id="root"></section>
