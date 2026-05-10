@@ -1,5 +1,7 @@
 // store frequently accessed elements
 const elements = {
+    episodesContainer: document.getElementById("root"),
+
     episodeSelector: document.getElementById("episode-selector"),
     epSearch: document.getElementById("episode-Search"),
 };
@@ -8,6 +10,8 @@ function setup() {
     const allEpisodes = getAllEpisodes();
     makePageForEpisodes(allEpisodes);
     populateEpisodeSelector(allEpisodes);
+
+    initEpisodeSelectListener(allEpisodes);
 }
 
 function makePageForEpisodes(episodeList) {
@@ -50,7 +54,6 @@ function makePageForEpisodes(episodeList) {
 }
 
 function populateEpisodeSelector(episodeList) {
-    console.log(epSelector);
     const defaultOpt = document.createElement("option");
     defaultOpt.selected = true;
     defaultOpt.textContent = "-- SELECT AN EPISODE --";
@@ -67,4 +70,27 @@ function populateEpisodeSelector(episodeList) {
     elements.episodeSelector.replaceChildren(defaultOpt, ...episodeOpts);
 }
 
+function initEpisodeSelectListener(episodeList) {
+    elements.episodeSelector.onchange = (e) => {
+        const val = e.target.value;
+
+        if (val === "") {
+            makePageForEpisodes(episodeList);
+        } else {
+            const filtered = episodeList.filter(
+                (ep) => ep.id === Number(e.target.value),
+            );
+
+            // need to first remove all children of the cards container, so that only a single
+            // card can be displayed
+            while (elements.episodesContainer.firstChild) {
+                elements.episodesContainer.removeChild(
+                    elements.episodesContainer.firstChild,
+                );
+            }
+
+            makePageForEpisodes(filtered);
+        }
+    };
+}
 window.onload = setup;
