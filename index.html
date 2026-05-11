@@ -1,50 +1,45 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>TV Show Project | Tomislav Dukez (tomdu3)</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Montserrat:wght@600;700&display=swap"
-            rel="stylesheet" />
-        <link href="style.css" rel="stylesheet" />
-        <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-    </head>
 
-    <body>
-        <header>
-            <h1>Tv Show Project</h1>
-        </header>
-        <main>
-            <section id="menu">
-                <select name="episode-selector" id="episode-selector"></select>
-                <div id="search-container">
-                    <label for="episode-search">Search Shows: </label>
-                    <input
-                        type="search"
-                        name="episode-search"
-                        id="episode-search" />
-                    <!-- the polite attribute stops text to voice software 
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TV Show Project | Tomislav Dukez (tomdu3)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Montserrat:wght@600;700&display=swap"
+        rel="stylesheet" />
+    <link href="style.css" rel="stylesheet" />
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+</head>
+
+<body>
+    <header>
+        <h1>Tv Show Project</h1>
+    </header>
+    <main>
+        <section id="menu">
+            <select name="episode-selector" id="episode-selector"></select>
+            <div id="search-container">
+                <label for="episode-search">Search Shows: </label>
+                <input type="search" name="episode-search" id="episode-search" />
+                <!-- the polite attribute stops text to voice software 
                      spamming as the episode count is updated rapidly -->
-                    <span id="episode-count" aria-live="polite"></span>
-                </div>
-            </section>
-            <section id="root"></section>
-        </main>
+                <span id="episode-count" aria-live="polite"></span>
+            </div>
+        </section>
+        <section id="root"></section>
+    </main>
 
-        <footer>
-            <p>
-                Tomislav Dukez, 2026. The data originally comes from
-                <a href="https://tvmaze.com/" target="_blank">TVMaze.com</a>.
-            </p>
-        </footer>
+    <footer>
+        <p>
+            Tomislav Dukez, 2026. The data originally comes from
+            <a href="https://tvmaze.com/" target="_blank">TVMaze.com</a>.
+        </p>
+    </footer>
 
-        <!-- Loads a provided function called getAllEpisodes() which returns all episodes -->
-        <script src="episodes.js"></script>
+    <!-- Loads YOUR javascript code -->
+    <script src="script.js"></script>
+</body>
 
-        <!-- Loads YOUR javascript code -->
-        <script src="script.js"></script>
-    </body>
 </html>
