@@ -75,9 +75,10 @@ function initEpisodeSelectListener(episodeList) {
     elements.episodeSelector.onchange = (e) => {
         const val = e.target.value;
 
+        // clear the search bar when a selection is made
+        elements.episodeSearch.value = "";
 
-        // need to first remove all children of the cards container, so that only a single
-        // card can be displayed
+        // remove all children of the cards container, so that only a single card can be displayed
         while (elements.episodesContainer.firstChild) {
             elements.episodesContainer.removeChild(
                 elements.episodesContainer.firstChild,
