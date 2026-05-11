@@ -75,20 +75,21 @@ function initEpisodeSelectListener(episodeList) {
     elements.episodeSelector.onchange = (e) => {
         const val = e.target.value;
 
+
+        // need to first remove all children of the cards container, so that only a single
+        // card can be displayed
+        while (elements.episodesContainer.firstChild) {
+            elements.episodesContainer.removeChild(
+                elements.episodesContainer.firstChild,
+            );
+        }
+
         if (val === "") {
             makePageForEpisodes(episodeList);
         } else {
             const filtered = episodeList.filter(
                 (ep) => ep.id === Number(e.target.value),
             );
-
-            // need to first remove all children of the cards container, so that only a single
-            // card can be displayed
-            while (elements.episodesContainer.firstChild) {
-                elements.episodesContainer.removeChild(
-                    elements.episodesContainer.firstChild,
-                );
-            }
 
             makePageForEpisodes(filtered);
         }
