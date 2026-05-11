@@ -6,13 +6,33 @@ const elements = {
     episodeSearch: document.getElementById("episode-search"),
 };
 
-function setup() {
-    const allEpisodes = getAllEpisodes();
-    makePageForEpisodes(allEpisodes);
-    populateEpisodeSelector(allEpisodes);
+// fetch all episodes from the api and display them
+async function setup() {
+    elements.episodesContainer.innerHTML = "<h2>Data is being fetched from the API, please wait...</h2>";
 
-    initEpisodeSelectListener(allEpisodes);
-    initSearchEpisodes(allEpisodes);
+    try {
+        const response = await fetch("https://api.tvmaze.com/shows/82/episodes");
+
+        // parse the json response
+        const allEpisodes = await response.json();
+
+        // clear the loading message
+        while (elements.episodesContainer.firstChild) {
+            elements.episodesContainer.removeChild(
+                elements.episodesContainer.firstChild,
+            );
+        }
+
+        makePageForEpisodes(allEpisodes);
+        populateEpisodeSelector(allEpisodes);
+
+        initEpisodeSelectListener(allEpisodes);
+        initSearchEpisodes(allEpisodes);
+    } catch (error) {
+        console.error("Failed to fetch episodes:", error);
+        elements.episodesContainer.innerHTML =
+            "<h2 style='color: red;'>Sorry, the data couldn't be fetched from the API at this time. Please try again later.</h2>";
+    }
 }
 
 function makePageForEpisodes(episodeList) {
