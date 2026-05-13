@@ -14,7 +14,6 @@ const cache = {
     episodes: {},
 };
 
-// fetch all episodes from the api and display them
 async function setup() {
     // cache shows on setup
     await cacheShows();
@@ -22,6 +21,7 @@ async function setup() {
     initShowSelectListener();
 }
 
+// on page load, cache the shows. Only need to fetch shows once
 async function cacheShows() {
     try {
         elements.episodesContainer.innerHTML =
@@ -36,13 +36,17 @@ async function cacheShows() {
     }
 }
 
-// returns all episodes of a show
-// from cache or from API if not in cache
+// given a show ID, returns all episodes of the show
+// first checks cache
+// if not in cache, fetches from API, and stores in cache.
+// throws error if episodes cannot be fetched
 async function getEpisodes(showId) {
     return (cache.episodes[showId] ??= await fetchEpisodes(showId));
 }
 
-// show selector event handler
+// when show is selected from drop down
+// fetches all episodes of show, displays them on page
+// updates episode selector and search input to match selected show
 async function initShowSelectListener() {
     elements.showSelector.addEventListener("change", async (e) => {
         const showId = e.target.value;
@@ -50,9 +54,10 @@ async function initShowSelectListener() {
         if (showId !== "") {
             try {
                 const episodes = await getEpisodes(showId);
+                makePageForEpisodes(episodes);
                 populateEpisodeSelector(episodes);
                 initEpisodeSelectListener(episodes);
-                makePageForEpisodes(episodes);
+                initSearchEpisodes(episodes);
             } catch (error) {
                 console.error("Failed to fetch episodes:", error);
                 elements.episodesContainer.innerHTML =
@@ -67,7 +72,6 @@ async function initShowSelectListener() {
 
 function makePageForEpisodes(episodeList) {
     clearContainer(); // clear the container of episode cards first
-    const rootElem = document.getElementById("root");
 
     // Loop through each episode in the list
     episodeList.forEach((episode) => {
@@ -101,7 +105,7 @@ function makePageForEpisodes(episodeList) {
         episodeDiv.appendChild(summary);
 
         // append the episode div to root element
-        rootElem.appendChild(episodeDiv);
+        elements.episodesContainer.appendChild(episodeDiv);
     });
 }
 
