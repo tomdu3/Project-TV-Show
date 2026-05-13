@@ -1,17 +1,29 @@
+import { fetchShows, fetchEpisodes } from "./fetchShowData.js";
+
 // store frequently accessed elements
 const elements = {
     episodesContainer: document.getElementById("root"),
-
     episodeSelector: document.getElementById("episode-selector"),
     episodeSearch: document.getElementById("episode-search"),
 };
 
+// cache data to avoid repeated API calls
+const cache = {
+    shows: [],
+    episodes: {},
+};
+
 // fetch all episodes from the api and display them
 async function setup() {
-    elements.episodesContainer.innerHTML = "<h2>Data is being fetched from the API, please wait...</h2>";
+    elements.episodesContainer.innerHTML =
+        "<h2>Data is being fetched from the API, please wait...</h2>";
 
+    // cache shows on set up to avoid unnecessary API calls
+    cacheShows();
     try {
-        const response = await fetch("https://api.tvmaze.com/shows/82/episodes");
+        const response = await fetch(
+            "https://api.tvmaze.com/shows/82/episodes",
+        );
 
         // parse the json response
         const allEpisodes = await response.json();
@@ -34,6 +46,30 @@ async function setup() {
             "<h2 style='color: red;'>Sorry, the data couldn't be fetched from the API at this time. Please try again later.</h2>";
     }
 }
+
+async function cacheShows() {
+    try {
+        const temp = await fetchShows();
+        // base sensitivity ignores accents and case
+        cache.shows = temp.sort((a, b) =>
+            a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
+        );
+    } catch (error) {
+        console.error("Failed to fetch episodes:", error);
+        elements.episodesContainer.innerHTML =
+            "<h2 style='color: red;'>Sorry, the data couldn't be fetched from the API at this time. Please try again later.</h2>";
+    }
+}
+
+//populate show selector
+
+async function getEpisodes(showId) {
+    // fetch from cache or API
+    // called by
+}
+
+// show selector event handler
+// show selector
 
 function makePageForEpisodes(episodeList) {
     const rootElem = document.getElementById("root");
