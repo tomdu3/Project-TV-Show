@@ -1,10 +1,11 @@
-import { fetchShows, fetchEpisodes } from "./fetchShowData.js";
+import { fetchShows, fetchEpisodes } from "./fetchTVData.js";
 
 // store frequently accessed elements
 const elements = {
     episodesContainer: document.getElementById("root"),
     episodeSelector: document.getElementById("episode-selector"),
     episodeSearch: document.getElementById("episode-search"),
+    showSelector: document.getElementById("show-selector"),
 };
 
 // cache data to avoid repeated API calls
@@ -15,63 +16,57 @@ const cache = {
 
 // fetch all episodes from the api and display them
 async function setup() {
-    elements.episodesContainer.innerHTML =
-        "<h2>Data is being fetched from the API, please wait...</h2>";
-
-    // cache shows on set up to avoid unnecessary API calls
-    cacheShows();
-    try {
-        const response = await fetch(
-            "https://api.tvmaze.com/shows/82/episodes",
-        );
-
-        // parse the json response
-        const allEpisodes = await response.json();
-
-        // clear the loading message
-        while (elements.episodesContainer.firstChild) {
-            elements.episodesContainer.removeChild(
-                elements.episodesContainer.firstChild,
-            );
-        }
-
-        makePageForEpisodes(allEpisodes);
-        populateEpisodeSelector(allEpisodes);
-
-        initEpisodeSelectListener(allEpisodes);
-        initSearchEpisodes(allEpisodes);
-    } catch (error) {
-        console.error("Failed to fetch episodes:", error);
-        elements.episodesContainer.innerHTML =
-            "<h2 style='color: red;'>Sorry, the data couldn't be fetched from the API at this time. Please try again later.</h2>";
-    }
+    // cache shows on setup
+    await cacheShows();
+    populateShowSelector();
+    initShowSelectListener();
 }
 
 async function cacheShows() {
     try {
-        const temp = await fetchShows();
-        // base sensitivity ignores accents and case
-        cache.shows = temp.sort((a, b) =>
-            a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
-        );
+        elements.episodesContainer.innerHTML =
+            "<h2>Data is being fetched from the API, please wait...</h2>";
+        cache.shows = await fetchShows();
+        elements.episodesContainer.innerHTML =
+            "<h2>To see list of episodes, select a show.</h2>";
     } catch (error) {
         console.error("Failed to fetch episodes:", error);
         elements.episodesContainer.innerHTML =
-            "<h2 style='color: red;'>Sorry, the data couldn't be fetched from the API at this time. Please try again later.</h2>";
+            "<h2 style='color: red;'>Sorry, the show data couldn't be fetched from the API at this time. Please try again later.</h2>";
     }
 }
 
-//populate show selector
-
+// returns all episodes of a show
+// from cache or from API if not in cache
 async function getEpisodes(showId) {
-    // fetch from cache or API
-    // called by
+    return (cache.episodes[showId] ??= await fetchEpisodes(showId));
 }
 
 // show selector event handler
-// show selector
+async function initShowSelectListener() {
+    elements.showSelector.addEventListener("change", async (e) => {
+        const showId = e.target.value;
+
+        if (showId !== "") {
+            try {
+                const episodes = await getEpisodes(showId);
+                populateEpisodeSelector(episodes);
+                initEpisodeSelectListener(episodes);
+                makePageForEpisodes(episodes);
+            } catch (error) {
+                console.error("Failed to fetch episodes:", error);
+                elements.episodesContainer.innerHTML =
+                    "<h2 style='color: red;'>Sorry, the episode data couldn't be fetched from the API at this time. Please try again later.</h2>";
+            }
+        } else {
+            elements.episodesContainer.innerHTML =
+                "<h2>To see list of episodes, select a show.</h2>";
+        }
+    });
+}
 
 function makePageForEpisodes(episodeList) {
+    clearContainer(); // clear the container of episode cards first
     const rootElem = document.getElementById("root");
 
     // Loop through each episode in the list
@@ -127,6 +122,21 @@ function populateEpisodeSelector(episodeList) {
     elements.episodeSelector.replaceChildren(defaultOpt, ...episodeOpts);
 }
 
+function populateShowSelector(showList) {
+    const defaultOpt = document.createElement("option");
+    defaultOpt.selected = true;
+    defaultOpt.textContent = "-- SELECT A SHOW --";
+    defaultOpt.value = "";
+    const showOpts = cache.shows.map((show) => {
+        const opt = document.createElement("option");
+        opt.textContent = show.name;
+        opt.value = show.id;
+        return opt;
+    });
+
+    elements.showSelector.replaceChildren(defaultOpt, ...showOpts);
+}
+
 function initEpisodeSelectListener(episodeList) {
     elements.episodeSelector.onchange = (e) => {
         const val = e.target.value;
@@ -135,11 +145,7 @@ function initEpisodeSelectListener(episodeList) {
         elements.episodeSearch.value = "";
 
         // remove all children of the cards container, so that only a single card can be displayed
-        while (elements.episodesContainer.firstChild) {
-            elements.episodesContainer.removeChild(
-                elements.episodesContainer.firstChild,
-            );
-        }
+        clearContainer();
 
         if (val === "") {
             makePageForEpisodes(episodeList);
@@ -151,6 +157,15 @@ function initEpisodeSelectListener(episodeList) {
             makePageForEpisodes(filtered);
         }
     };
+}
+
+// utility function to clear the episode container
+function clearContainer() {
+    while (elements.episodesContainer.firstChild) {
+        elements.episodesContainer.removeChild(
+            elements.episodesContainer.firstChild,
+        );
+    }
 }
 
 function initSearchEpisodes(episodeList) {
