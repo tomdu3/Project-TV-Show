@@ -1,42 +1,83 @@
+import { fetchShows, fetchEpisodes } from "./fetchTVData.js";
+
 // store frequently accessed elements
 const elements = {
     episodesContainer: document.getElementById("root"),
-
     episodeSelector: document.getElementById("episode-selector"),
     episodeSearch: document.getElementById("episode-search"),
+    showSelector: document.getElementById("show-selector"),
+
+    searchCount: document.getElementById("episode-count"),
 };
 
-// fetch all episodes from the api and display them
+// cache data to avoid repeated API calls
+const cache = {
+    shows: [],
+    episodes: {},
+};
+
 async function setup() {
-    elements.episodesContainer.innerHTML = "<h2>Data is being fetched from the API, please wait...</h2>";
+    // cache shows on setup
+    await cacheShows();
+    populateShowSelector();
+    initShowSelectListener();
+}
 
+// on page load, cache the shows. Only need to fetch shows once
+async function cacheShows() {
     try {
-        const response = await fetch("https://api.tvmaze.com/shows/82/episodes");
-
-        // parse the json response
-        const allEpisodes = await response.json();
-
-        // clear the loading message
-        while (elements.episodesContainer.firstChild) {
-            elements.episodesContainer.removeChild(
-                elements.episodesContainer.firstChild,
-            );
-        }
-
-        makePageForEpisodes(allEpisodes);
-        populateEpisodeSelector(allEpisodes);
-
-        initEpisodeSelectListener(allEpisodes);
-        initSearchEpisodes(allEpisodes);
+        elements.episodesContainer.innerHTML =
+            "<h2>Data is being fetched from the API, please wait...</h2>";
+        let data = await fetchShows();
+        data = data.sort((a, b) =>
+            a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
+        );
+        cache.shows = data;
+        elements.episodesContainer.innerHTML =
+            "<h2>To see list of episodes, select a show.</h2>";
     } catch (error) {
         console.error("Failed to fetch episodes:", error);
         elements.episodesContainer.innerHTML =
-            "<h2 style='color: red;'>Sorry, the data couldn't be fetched from the API at this time. Please try again later.</h2>";
+            "<h2 style='color: red;'>Sorry, the show data couldn't be fetched from the API at this time. Please try again later.</h2>";
     }
 }
 
+// given a show ID, returns all episodes of the show
+// first checks cache
+// if not in cache, fetches from API, and stores in cache.
+// throws error if episodes cannot be fetched
+async function getEpisodes(showId) {
+    return (cache.episodes[showId] ??= await fetchEpisodes(showId));
+}
+
+// when show is selected from drop down
+// fetches all episodes of show, displays them on page
+// updates episode selector and search input to match selected show
+async function initShowSelectListener() {
+    elements.showSelector.addEventListener("change", async (e) => {
+        const showId = e.target.value;
+
+        if (showId !== "") {
+            try {
+                const episodes = await getEpisodes(showId);
+                makePageForEpisodes(episodes);
+                populateEpisodeSelector(episodes);
+                initEpisodeSelectListener(episodes);
+                initSearchEpisodes(episodes);
+            } catch (error) {
+                console.error("Failed to fetch episodes:", error);
+                elements.episodesContainer.innerHTML =
+                    "<h2 style='color: red;'>Sorry, the episode data couldn't be fetched from the API at this time. Please try again later.</h2>";
+            }
+        } else {
+            elements.episodesContainer.innerHTML =
+                "<h2>To see list of episodes, select a show.</h2>";
+        }
+    });
+}
+
 function makePageForEpisodes(episodeList) {
-    const rootElem = document.getElementById("root");
+    clearContainer(); // clear the container of episode cards first
 
     // Loop through each episode in the list
     episodeList.forEach((episode) => {
@@ -70,7 +111,7 @@ function makePageForEpisodes(episodeList) {
         episodeDiv.appendChild(summary);
 
         // append the episode div to root element
-        rootElem.appendChild(episodeDiv);
+        elements.episodesContainer.appendChild(episodeDiv);
     });
 }
 
@@ -91,6 +132,21 @@ function populateEpisodeSelector(episodeList) {
     elements.episodeSelector.replaceChildren(defaultOpt, ...episodeOpts);
 }
 
+function populateShowSelector(showList) {
+    const defaultOpt = document.createElement("option");
+    defaultOpt.selected = true;
+    defaultOpt.textContent = "-- SELECT A SHOW --";
+    defaultOpt.value = "";
+    const showOpts = cache.shows.map((show) => {
+        const opt = document.createElement("option");
+        opt.textContent = show.name;
+        opt.value = show.id;
+        return opt;
+    });
+
+    elements.showSelector.replaceChildren(defaultOpt, ...showOpts);
+}
+
 function initEpisodeSelectListener(episodeList) {
     elements.episodeSelector.onchange = (e) => {
         const val = e.target.value;
@@ -99,11 +155,7 @@ function initEpisodeSelectListener(episodeList) {
         elements.episodeSearch.value = "";
 
         // remove all children of the cards container, so that only a single card can be displayed
-        while (elements.episodesContainer.firstChild) {
-            elements.episodesContainer.removeChild(
-                elements.episodesContainer.firstChild,
-            );
-        }
+        clearContainer();
 
         if (val === "") {
             makePageForEpisodes(episodeList);
@@ -117,7 +169,18 @@ function initEpisodeSelectListener(episodeList) {
     };
 }
 
+// utility function to clear the episode container
+function clearContainer() {
+    while (elements.episodesContainer.firstChild) {
+        elements.episodesContainer.removeChild(
+            elements.episodesContainer.firstChild,
+        );
+    }
+}
+
 function initSearchEpisodes(episodeList) {
+    const totalEpisodes = episodeList.length;
+    elements.searchCount.textContent = `${episodeList.length} / ${totalEpisodes} episodes`;
     elements.episodeSearch.oninput = (e) => {
         const searchStr = e.target.value.toLowerCase();
         const filtered = episodeList.filter(
@@ -131,8 +194,8 @@ function initSearchEpisodes(episodeList) {
                 elements.episodesContainer.firstChild,
             );
         }
-
         makePageForEpisodes(filtered);
+        elements.searchCount.textContent = `${filtered.length} / ${totalEpisodes} episodes`;
     };
 }
 window.onload = setup;
