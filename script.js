@@ -26,7 +26,11 @@ async function cacheShows() {
     try {
         elements.episodesContainer.innerHTML =
             "<h2>Data is being fetched from the API, please wait...</h2>";
-        cache.shows = await fetchShows();
+        let data = await fetchShows();
+        data = data.sort((a, b) =>
+            a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
+        );
+        cache.shows = data;
         elements.episodesContainer.innerHTML =
             "<h2>To see list of episodes, select a show.</h2>";
     } catch (error) {
