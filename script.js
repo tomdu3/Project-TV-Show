@@ -6,6 +6,8 @@ const elements = {
     episodeSelector: document.getElementById("episode-selector"),
     episodeSearch: document.getElementById("episode-search"),
     showSelector: document.getElementById("show-selector"),
+
+    searchCount: document.getElementById("episode-count"),
 };
 
 // cache data to avoid repeated API calls
@@ -177,6 +179,8 @@ function clearContainer() {
 }
 
 function initSearchEpisodes(episodeList) {
+    const totalEpisodes = episodeList.length;
+    elements.searchCount.textContent = `${episodeList.length} / ${totalEpisodes} episodes`;
     elements.episodeSearch.oninput = (e) => {
         const searchStr = e.target.value.toLowerCase();
         const filtered = episodeList.filter(
@@ -190,8 +194,8 @@ function initSearchEpisodes(episodeList) {
                 elements.episodesContainer.firstChild,
             );
         }
-
         makePageForEpisodes(filtered);
+        elements.searchCount.textContent = `${filtered.length} / ${totalEpisodes} episodes`;
     };
 }
 window.onload = setup;
