@@ -21,7 +21,9 @@ function displayEpisodeCard(episode) {
 
 // test for one episode
 const rootElem = document.getElementById("root");
-const episodeEl = displayEpisodeCard(getOneEpisode());
-root.appendChild(episodeEl);
+const allEpisodesCards = getAllEpisodes().map((episode) =>
+  displayEpisodeCard(episode),
+);
+root.append(...allEpisodesCards);
 
 window.onload = setup;
