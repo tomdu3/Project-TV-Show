@@ -14,6 +14,9 @@ function displayEpisodeCard(episode) {
   card.querySelector("h3").innerText =
     `${episode.name} - S${String(episode.season).padStart(2, "0")}E${String(episode.number).padStart(2, "0")}`;
   card.querySelector("img").src = episode.image.medium;
+  card.querySelector("img").alt =
+    `Scene from season ${episode.season} episode ${episode.number}, ${episode.name}`;
+
   // use regex to remove tags from summary  value in db
   card.querySelector("p").innerText = episode.summary.replace(/<[^>]*>/g, "");
   return card;
