@@ -5,6 +5,7 @@
 const state = {
   episodes: getAllEpisodes(),
   searchTerm: "",
+  selectedEpisodeCode: "",
 };
 
 // -----------------------------------------------------
@@ -39,17 +40,23 @@ function displayEpisodeCard(episode) {
 // RENDER
 // -----------------------------------------------------
 function render() {
-  const searchTerm = state.searchTerm.toLowerCase();
+  let filteredEpisodes = state.episodes;
 
-  //create array that has only episodes where either the episode name OR the summary contains the search term
-  const filteredEpisodes = state.episodes.filter((episode) => {
-    const episodeName = episode.name.toLowerCase();
-    const episodeSummary = episode.summary.toLowerCase();
-
-    return (
-      episodeName.includes(searchTerm) || episodeSummary.includes(searchTerm)
+  if (state.selectedEpisodeCode) {
+    filteredEpisodes = state.episodes.filter(
+      (episode) => getEpisodeCode(episode) === state.selectedEpisodeCode,
     );
-  });
+  } else if (state.searchTerm) {
+    const searchTerm = state.searchTerm.toLowerCase();
+    filteredEpisodes = state.episodes.filter((episode) => {
+      const episodeName = episode.name.toLowerCase();
+      const episodeSummary = episode.summary.toLowerCase();
+
+      return (
+        episodeName.includes(searchTerm) || episodeSummary.includes(searchTerm)
+      );
+    });
+  }
 
   const episodeCards = filteredEpisodes.map(displayEpisodeCard);
 
@@ -95,6 +102,9 @@ searchInput.addEventListener("input", handleSearchInput);
 function handleSearchInput(event) {
   const searchTerm = event.target.value;
   state.searchTerm = searchTerm;
+  state.selectedEpisodeCode = ""; // Reset selector state
+  document.getElementById("episode-selector").value = ""; // Reset selector dropdown visually
+
   //change of state- redo the page
   render();
 }
@@ -105,12 +115,11 @@ episodeSelector.addEventListener("change", handleEpisodeSelect);
 
 function handleEpisodeSelect(event) {
   const selectedCode = event.target.value;
-  if (!selectedCode) return;
+  state.selectedEpisodeCode = selectedCode;
+  state.searchTerm = ""; // Reset search term
+  document.getElementById("search-input").value = ""; // Reset search input visually
 
-  const targetCard = document.getElementById(selectedCode);
-  if (targetCard) {
-    targetCard.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
+  render();
 }
 
 populateEpisodeSelector();
