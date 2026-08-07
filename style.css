@@ -103,11 +103,15 @@ footer {
     width: 100%;
   }
 
-  .control-group input,
-  .control-group select {
+  .control-group select,
+  .search-container {
     width: 100%;
     max-width: 280px;
     min-width: 0;
+  }
+
+  .search-container input {
+    width: 100%;
   }
 
   #episode-count {
@@ -131,3 +135,32 @@ footer {
   white-space: nowrap;
   border: 0;
 }
+
+.search-container {
+  position: relative;
+}
+
+.search-container input {
+  padding-right: 2.2rem !important; /* reserve space for 'x' button inside input */
+}
+
+.clear-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  font-weight: bold;
+  cursor: pointer;
+  color: #888;
+  display: none;
+  padding: 0;
+  line-height: 1;
+}
+
+.clear-btn:hover {
+  color: #333;
+}
+

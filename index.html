@@ -20,7 +20,10 @@
 
     <div class="control-group">
       <label for="search-input" class="visually-hidden">Search</label>
-      <input type="text" placeholder="Search for an episode..." id="search-input">
+      <div class="search-container">
+        <input type="text" placeholder="Search for an episode..." id="search-input">
+        <button type="button" id="clear-search-btn" class="clear-btn" aria-label="Clear search">&times;</button>
+      </div>
     </div>
 
     <p id="episode-count"></p>

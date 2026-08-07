@@ -96,6 +96,7 @@ function populateEpisodeSelector() {
 // -----------------------------------------------------
 
 const searchInput = document.getElementById("search-input");
+const clearSearchBtn = document.getElementById("clear-search-btn");
 
 searchInput.addEventListener("input", handleSearchInput);
 
@@ -104,6 +105,12 @@ function handleSearchInput(event) {
   state.searchTerm = searchTerm;
   state.selectedEpisodeCode = ""; // Reset selector state
   document.getElementById("episode-selector").value = ""; // Reset selector dropdown visually
+
+  if (searchTerm) {
+    clearSearchBtn.style.display = "inline-block";
+  } else {
+    clearSearchBtn.style.display = "none";
+  }
 
   //change of state- redo the page
   render();
@@ -118,9 +125,17 @@ function handleEpisodeSelect(event) {
   state.selectedEpisodeCode = selectedCode;
   state.searchTerm = ""; // Reset search term
   document.getElementById("search-input").value = ""; // Reset search input visually
+  clearSearchBtn.style.display = "none";
 
   render();
 }
+
+clearSearchBtn.addEventListener("click", () => {
+  searchInput.value = "";
+  state.searchTerm = "";
+  clearSearchBtn.style.display = "none";
+  render();
+});
 
 populateEpisodeSelector();
 render();
