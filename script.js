@@ -14,8 +14,8 @@
 // -----------------------------------------------------
 
 const state = {
-  episodes: getAllepisodes(),
-  serachTerm: "",
+  episodes: getAllEpisodes(),
+  searchTerm: "",
 };
 
 // -----------------------------------------------------
@@ -43,7 +43,7 @@ function displayEpisodeCard(episode) {
 // STEP 2: RENDER
 // -----------------------------------------------------
 function render() {
-  //make search case-insesitive
+  //make search case-insensitive
   const searchTerm = state.searchTerm.toLowerCase();
 
   //create array that has only episodes where either the episode name OR the summary contains the search term
