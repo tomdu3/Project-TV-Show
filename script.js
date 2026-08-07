@@ -21,12 +21,11 @@ const state = {
 // -----------------------------------------------------
 // HELPER: implement episode code function
 // -----------------------------------------------------
-function getEpisodeCode(episode) {   // 👈 goes here
+function getEpisodeCode(episode) {
   const season = String(episode.season).padStart(2, "0");
   const number = String(episode.number).padStart(2, "0");
   return `S${season}E${number}`;
-
-
+}
 
 // -----------------------------------------------------
 // MAKE ONE EPISODE CARD
@@ -41,7 +40,7 @@ function displayEpisodeCard(episode) {
   card.querySelector("section").id = episodeCode;
 
   // Add the episode name and formatted episode code
-  card.querySelector("h3").innerText = `${episode.name} - ${episodeCode}}`;
+  card.querySelector("h3").innerText = `${episode.name} - ${episodeCode}`;
   // Add the episode image
   card.querySelector("img").src = episode.image.medium;
   // Add alt text to the image
@@ -129,5 +128,20 @@ function handleSearchInput(event) {
   render();
 }
 
+// episode selector
+const episodeSelector = document.getElementById("episode-selector");
+episodeSelector.addEventListener("change", handleEpisodeSelect);
+
+function handleEpisodeSelect(event) {
+  const selectedCode = event.target.value;
+  if (!selectedCode) return;
+
+  const targetCard = document.getElementById(selectedCode);
+  if (targetCard) {
+    targetCard.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+populateEpisodeSelector();
 render();
 // window.onload = setup;
