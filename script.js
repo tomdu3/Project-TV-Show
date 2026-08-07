@@ -19,14 +19,29 @@ const state = {
 };
 
 // -----------------------------------------------------
+// HELPER: implement episode code function
+// -----------------------------------------------------
+function getEpisodeCode(episode) {   // 👈 goes here
+  const season = String(episode.season).padStart(2, "0");
+  const number = String(episode.number).padStart(2, "0");
+  return `S${season}E${number}`;
+
+
+
+// -----------------------------------------------------
 // MAKE ONE EPISODE CARD
 // -----------------------------------------------------
 function displayEpisodeCard(episode) {
   // Make a new copy of the HTML template
   const card = document.getElementById("episode-card").content.cloneNode(true);
+  //create the episode code
+  const episodeCode = getEpisodeCode(episode);
+
+  //set id on to section element
+  card.querySelector("section").id = episodeCode;
+
   // Add the episode name and formatted episode code
-  card.querySelector("h3").innerText =
-    `${episode.name} - S${String(episode.season).padStart(2, "0")}E${String(episode.number).padStart(2, "0")}`;
+  card.querySelector("h3").innerText = `${episode.name} - ${episodeCode}}`;
   // Add the episode image
   card.querySelector("img").src = episode.image.medium;
   // Add alt text to the image
@@ -40,7 +55,7 @@ function displayEpisodeCard(episode) {
 }
 
 // -----------------------------------------------------
-// STEP 2: RENDER
+// RENDER
 // -----------------------------------------------------
 function render() {
   //make search case-insensitive
@@ -77,6 +92,25 @@ function render() {
 //   displayEpisodeCard(episode),
 // );
 // rootElem.append(...allEpisodesCards);
+
+// -----------------------------------------------------
+// EPISODE SELECTOR (dropdown)
+// -----------------------------------------------------
+
+function populateEpisodeSelector() {
+  const selector = document.getElementById("episode-selector");
+
+  // Loop through every episode and add it as an <option>
+  state.episodes.forEach((episode) => {
+    const episodeCode = getEpisodeCode(episode);
+
+    const option = document.createElement("option");
+    option.value = episodeCode; //to find the card
+    option.textContent = `${episodeCode} - ${episode.name}`; //what is seen by user
+
+    selector.append(option);
+  });
+}
 
 // -----------------------------------------------------
 // REACT TO EVENTS
