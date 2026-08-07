@@ -27,6 +27,6 @@ const rootElem = document.getElementById("root");
 const allEpisodesCards = getAllEpisodes().map((episode) =>
   displayEpisodeCard(episode),
 );
-root.append(...allEpisodesCards);
+rootElem.append(...allEpisodesCards);
 
 window.onload = setup;
