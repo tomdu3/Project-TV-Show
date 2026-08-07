@@ -1,14 +1,3 @@
-//You can edit ALL of the code here
-// function setup() {
-//   const allEpisodes = getAllEpisodes();
-//   const oneEpisode = getOneEpisode();
-// }
-
-// function makePageForEpisodes(episodeList) {
-//   const rootElem = document.getElementById("root");
-//   rootElem.textContent = `Got ${episodeList.length} episode(s)`;
-// }
-
 // -----------------------------------------------------
 // STATE
 // -----------------------------------------------------
@@ -31,19 +20,12 @@ function getEpisodeCode(episode) {
 // MAKE ONE EPISODE CARD
 // -----------------------------------------------------
 function displayEpisodeCard(episode) {
-  // Make a new copy of the HTML template
   const card = document.getElementById("episode-card").content.cloneNode(true);
-  //create the episode code
   const episodeCode = getEpisodeCode(episode);
 
-  //set id on to section element
   card.querySelector("section").id = episodeCode;
-
-  // Add the episode name and formatted episode code
   card.querySelector("h3").innerText = `${episode.name} - ${episodeCode}`;
-  // Add the episode image
   card.querySelector("img").src = episode.image.medium;
-  // Add alt text to the image
   card.querySelector("img").alt =
     `Scene from season ${episode.season} episode ${episode.number}, ${episode.name}`;
 
@@ -57,7 +39,6 @@ function displayEpisodeCard(episode) {
 // RENDER
 // -----------------------------------------------------
 function render() {
-  //make search case-insensitive
   const searchTerm = state.searchTerm.toLowerCase();
 
   //create array that has only episodes where either the episode name OR the summary contains the search term
@@ -70,7 +51,6 @@ function render() {
     );
   });
 
-  //turn matching episode cards to a html card
   const episodeCards = filteredEpisodes.map(displayEpisodeCard);
 
   //clear out the previous
@@ -85,13 +65,6 @@ function render() {
   episodeCount.textContent = `Displaying ${filteredEpisodes.length} of ${state.episodes.length} episodes`;
 }
 
-// // test for one episode
-// const rootElem = document.getElementById("root");
-// const allEpisodesCards = getAllEpisodes().map((episode) =>
-//   displayEpisodeCard(episode),
-// );
-// rootElem.append(...allEpisodesCards);
-
 // -----------------------------------------------------
 // EPISODE SELECTOR (dropdown)
 // -----------------------------------------------------
@@ -104,8 +77,8 @@ function populateEpisodeSelector() {
     const episodeCode = getEpisodeCode(episode);
 
     const option = document.createElement("option");
-    option.value = episodeCode; //to find the card
-    option.textContent = `${episodeCode} - ${episode.name}`; //what is seen by user
+    option.value = episodeCode;
+    option.textContent = `${episodeCode} - ${episode.name}`;
 
     selector.append(option);
   });
@@ -114,13 +87,11 @@ function populateEpisodeSelector() {
 // -----------------------------------------------------
 // REACT TO EVENTS
 // -----------------------------------------------------
-//get the search input from the DOM
+
 const searchInput = document.getElementById("search-input");
 
-//add event listener
 searchInput.addEventListener("input", handleSearchInput);
 
-//implement handleSearchInput
 function handleSearchInput(event) {
   const searchTerm = event.target.value;
   state.searchTerm = searchTerm;
@@ -144,4 +115,3 @@ function handleEpisodeSelect(event) {
 
 populateEpisodeSelector();
 render();
-// window.onload = setup;
