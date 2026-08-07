@@ -104,11 +104,12 @@ function handleSearchInput(event) {
   const searchTerm = event.target.value;
   state.searchTerm = searchTerm;
   state.selectedEpisodeCode = ""; // Reset selector state
-  document.getElementById("episode-selector").value = ""; // Reset selector dropdown visually
 
   if (searchTerm) {
+    document.getElementById("episode-selector").value = "searching"; // Set visually to 'Search filter active...'
     clearSearchBtn.style.display = "inline-block";
   } else {
+    document.getElementById("episode-selector").value = ""; // Reset back to default
     clearSearchBtn.style.display = "none";
   }
 
@@ -122,6 +123,8 @@ episodeSelector.addEventListener("change", handleEpisodeSelect);
 
 function handleEpisodeSelect(event) {
   const selectedCode = event.target.value;
+  if (selectedCode === "searching") return;
+
   state.selectedEpisodeCode = selectedCode;
   state.searchTerm = ""; // Reset search term
   document.getElementById("search-input").value = ""; // Reset search input visually
@@ -133,6 +136,7 @@ function handleEpisodeSelect(event) {
 clearSearchBtn.addEventListener("click", () => {
   searchInput.value = "";
   state.searchTerm = "";
+  document.getElementById("episode-selector").value = ""; // Reset dropdown visually
   clearSearchBtn.style.display = "none";
   render();
 });
