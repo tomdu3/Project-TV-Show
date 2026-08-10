@@ -7,13 +7,17 @@ const state = {
   searchTerm: "",
   selectedEpisodeCode: "",
   isLoading: true,
+  error: null,
 };
 
 // fetch all data from api
-const endpoint = "https://api.tvmaze.com/shows/82/episodes";
+const endpoint = "https://api.tvmaze.com/shows/82222222222222/episodes";
 
 const fetchAllEpisodes = async () => {
   const response = await fetch(endpoint);
+  if (!response.ok) {
+    throw new Error(`HTTP error ${response.status} (${response.statusText})`);
+  }
   return await response.json();
 };
 
@@ -57,12 +61,22 @@ function render() {
 
   rootElem.textContent = "";
 
+  if (state.error) {
+    episodeCount.textContent = "Error loading data";
+    const errorElem = document.createElement("div");
+    errorElem.className = "status-message error";
+    errorElem.innerHTML = `
+      <p>⚠️ Failed to load episodes: ${state.error}.</p>
+    `;
+    rootElem.append(errorElem);
+    return;
+  }
+
   if (state.isLoading) {
     episodeCount.textContent = "Loading episodes...";
     const loadingElem = document.createElement("div");
     loadingElem.className = "status-message loading";
     loadingElem.innerHTML = `
-      <div class="spinner"></div>
       <p>Loading episodes, please wait...</p>
     `;
     rootElem.append(loadingElem);
@@ -168,9 +182,15 @@ clearSearchBtn.addEventListener("click", () => {
 // Initialize the page
 render(); // Render loading state immediately while fetching
 
-fetchAllEpisodes().then((episodes) => {
-  state.isLoading = false;
-  state.episodes = episodes;
-  populateEpisodeSelector();
-  render();
-});
+fetchAllEpisodes()
+  .then((episodes) => {
+    state.isLoading = false;
+    state.episodes = episodes;
+    populateEpisodeSelector();
+    render();
+  })
+  .catch((err) => {
+    state.isLoading = false;
+    state.error = err.message || "An unexpected error occurred.";
+    render();
+  });

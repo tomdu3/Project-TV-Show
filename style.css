@@ -141,7 +141,7 @@ footer {
 }
 
 .search-container input {
-  padding-right: 2.2rem !important; /* reserve space for 'x' button inside input */
+  padding-right: 2.2rem !important;
 }
 
 .clear-btn {
@@ -164,3 +164,10 @@ footer {
   color: #333;
 }
 
+.status-message {
+  color: blue;
+}
+
+.status-message.error {
+  color: red;
+}
