@@ -3,9 +3,17 @@
 // -----------------------------------------------------
 
 const state = {
-  episodes: getAllEpisodes(),
+  episodes: [],
   searchTerm: "",
   selectedEpisodeCode: "",
+};
+
+// fetch all data from api
+const endpoint = "https://api.tvmaze.com/shows/82/episodes";
+
+const fetchAllEpisodes = async () => {
+  const response = await fetch(endpoint);
+  return await response.json();
 };
 
 // -----------------------------------------------------
@@ -141,5 +149,9 @@ clearSearchBtn.addEventListener("click", () => {
   render();
 });
 
-populateEpisodeSelector();
-render();
+// Initialize the page
+fetchAllEpisodes().then((episodes) => {
+  state.episodes = episodes;
+  populateEpisodeSelector();
+  render();
+});
