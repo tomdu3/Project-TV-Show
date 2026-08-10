@@ -11,18 +11,23 @@
 
 <body>
   <header class="controls-bar">
-    <label>
-      Search <input type="text" id="search-input">
-    </label>
-    <p id="episode-count"></p>
-
-    <!-- episode selector -->
-    <label>
-      Jump to episode
+    <div class="control-group">
+      <label for="episode-selector" class="visually-hidden">Jump to episode</label>
       <select name="" id="episode-selector">
-        <option value=""> Select an episode </option>
+        <option value="placeholder" disabled selected hidden>All episodes or Select...</option>
+        <option value="">All episodes or Select...</option>
       </select>
-    </label>
+    </div>
+
+    <div class="control-group">
+      <label for="search-input" class="visually-hidden">Search</label>
+      <div class="search-container">
+        <input type="text" placeholder="Search for an episode..." id="search-input">
+        <button type="button" id="clear-search-btn" class="clear-btn" aria-label="Clear search">&times;</button>
+      </div>
+    </div>
+
+    <p id="episode-count"></p>
   </header>
 
   <template id="episode-card">
@@ -32,13 +37,11 @@
       <p class="episode summary">Episode Summary</p>
     </section>
   </template>
-  <div id="root">
+  <main id="root" class="cards-container">
 
-  </div>
-  <footer>&copy; Tomislav Dukez 2026| Data taken from&nbsp;<a href="https://tvmaze.com/" target="_blank">TVMaze.com</a>
+  </main>
+  <footer>&copy; Tomislav Dukez 2026&nbsp;| Data taken from&nbsp;<a href="https://tvmaze.com/" target="_blank">TVMaze.com</a>
   </footer>
-  <!-- Loads a provided function called getAllEpisodes() which returns all episodes -->
-  <script src="episodes.js"></script>
 
   <!-- Loads YOUR javascript code -->
   <script src="script.js"></script>

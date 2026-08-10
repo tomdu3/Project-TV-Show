@@ -3,8 +3,22 @@
 // -----------------------------------------------------
 
 const state = {
-  episodes: getAllEpisodes(),
+  episodes: [],
   searchTerm: "",
+  selectedEpisodeCode: "",
+  isLoading: true,
+  error: null,
+};
+
+// fetch all data from api
+const endpoint = "https://api.tvmaze.com/shows/82/episodes";
+
+const fetchAllEpisodes = async () => {
+  const response = await fetch(endpoint);
+  if (!response.ok) {
+    throw new Error(`HTTP error ${response.status} (${response.statusText})`);
+  }
+  return await response.json();
 };
 
 // -----------------------------------------------------
@@ -25,12 +39,15 @@ function displayEpisodeCard(episode) {
 
   card.querySelector("section").id = episodeCode;
   card.querySelector("h3").innerText = `${episode.name} - ${episodeCode}`;
-  card.querySelector("img").src = episode.image.medium;
+  card.querySelector("img").src = episode.image?.medium || ""; // set default empty string if no image
   card.querySelector("img").alt =
     `Scene from season ${episode.season} episode ${episode.number}, ${episode.name}`;
 
-  // use regex to remove tags from summary  value in db
-  card.querySelector("p").innerText = episode.summary.replace(/<[^>]*>/g, "");
+  // use regex to remove tags from summary  value in db and set default empty string if no summary
+  card.querySelector("p").innerText = (episode.summary || "").replace(
+    /<[^>]*>/g,
+    "",
+  );
 
   return card;
 }
@@ -39,29 +56,63 @@ function displayEpisodeCard(episode) {
 // RENDER
 // -----------------------------------------------------
 function render() {
-  const searchTerm = state.searchTerm.toLowerCase();
+  const rootElem = document.getElementById("root");
+  const episodeCount = document.getElementById("episode-count");
 
-  //create array that has only episodes where either the episode name OR the summary contains the search term
-  const filteredEpisodes = state.episodes.filter((episode) => {
-    const episodeName = episode.name.toLowerCase();
-    const episodeSummary = episode.summary.toLowerCase();
+  rootElem.textContent = "";
 
-    return (
-      episodeName.includes(searchTerm) || episodeSummary.includes(searchTerm)
+  //show error state if something goes wrong with API call
+  //TODO: make error message look nicer with a big icon (and a button to try again, maybe?)
+  if (state.error) {
+    // TODO:  possible change episodeCount name and element id for multiple purposes (count, loading, error, message...)
+    episodeCount.textContent = "Error loading data";
+    const errorElem = document.createElement("div");
+    errorElem.className = "status-message error";
+    errorElem.innerHTML = `
+      <p>⚠️ Failed to load episodes: ${state.error}.</p>
+    `;
+    rootElem.append(errorElem);
+    return;
+  }
+
+  // show loading state while API call is in progress
+  // TODO: Make it look nicer with a spinner
+
+  if (state.isLoading) {
+    episodeCount.textContent = "Loading episodes...";
+    const loadingElem = document.createElement("div");
+    loadingElem.className = "status-message loading";
+    loadingElem.innerHTML = `
+      <p>Loading episodes, please wait...</p>
+    `;
+    rootElem.append(loadingElem);
+    return;
+  }
+
+  let filteredEpisodes = state.episodes;
+
+  if (state.selectedEpisodeCode) {
+    filteredEpisodes = state.episodes.filter(
+      (episode) => getEpisodeCode(episode) === state.selectedEpisodeCode,
     );
-  });
+  } else if (state.searchTerm) {
+    const searchTerm = state.searchTerm.toLowerCase();
+    filteredEpisodes = state.episodes.filter((episode) => {
+      const episodeName = episode.name.toLowerCase();
+      const episodeSummary = (episode.summary || "").toLowerCase();
+
+      return (
+        episodeName.includes(searchTerm) || episodeSummary.includes(searchTerm)
+      );
+    });
+  }
 
   const episodeCards = filteredEpisodes.map(displayEpisodeCard);
-
-  //clear out the previous
-  const rootElem = document.getElementById("root");
-  rootElem.textContent = "";
 
   //add the newly created cards
   rootElem.append(...episodeCards);
 
   //display the number of current search match
-  const episodeCount = document.getElementById("episode-count");
   episodeCount.textContent = `Displaying ${filteredEpisodes.length} of ${state.episodes.length} episodes`;
 }
 
@@ -89,12 +140,23 @@ function populateEpisodeSelector() {
 // -----------------------------------------------------
 
 const searchInput = document.getElementById("search-input");
+const clearSearchBtn = document.getElementById("clear-search-btn");
 
 searchInput.addEventListener("input", handleSearchInput);
 
 function handleSearchInput(event) {
   const searchTerm = event.target.value;
   state.searchTerm = searchTerm;
+  state.selectedEpisodeCode = ""; // Reset selector state
+
+  if (searchTerm) {
+    document.getElementById("episode-selector").value = "placeholder"; // Set to hidden placeholder
+    clearSearchBtn.style.display = "inline-block";
+  } else {
+    document.getElementById("episode-selector").value = "placeholder"; // Reset back to default
+    clearSearchBtn.style.display = "none";
+  }
+
   //change of state- redo the page
   render();
 }
@@ -105,13 +167,36 @@ episodeSelector.addEventListener("change", handleEpisodeSelect);
 
 function handleEpisodeSelect(event) {
   const selectedCode = event.target.value;
-  if (!selectedCode) return;
+  if (selectedCode === "placeholder") return;
 
-  const targetCard = document.getElementById(selectedCode);
-  if (targetCard) {
-    targetCard.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
+  state.selectedEpisodeCode = selectedCode;
+  state.searchTerm = ""; // Reset search term
+  document.getElementById("search-input").value = ""; // Reset search input visually
+  clearSearchBtn.style.display = "none";
+
+  render();
 }
 
-populateEpisodeSelector();
-render();
+clearSearchBtn.addEventListener("click", () => {
+  searchInput.value = "";
+  state.searchTerm = "";
+  document.getElementById("episode-selector").value = "placeholder"; // Reset dropdown visually
+  clearSearchBtn.style.display = "none";
+  render();
+});
+
+// Initialize the page
+render(); // Render loading state immediately while fetching
+
+fetchAllEpisodes()
+  .then((episodes) => {
+    state.isLoading = false;
+    state.episodes = episodes;
+    populateEpisodeSelector();
+    render();
+  })
+  .catch((err) => {
+    state.isLoading = false;
+    state.error = err.message || "An unexpected error occurred.";
+    render();
+  });
