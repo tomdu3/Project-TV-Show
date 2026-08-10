@@ -188,16 +188,15 @@ clearSearchBtn.addEventListener("click", () => {
 // Initialize the page
 render(); // Render loading state immediately while fetching
 
-fetchAllEpisodes().then((episodes) => {
-  setTimeout(() => {
-    // remove previous line if not testing delay
+fetchAllEpisodes()
+  .then((episodes) => {
     state.isLoading = false;
     state.episodes = episodes;
     populateEpisodeSelector();
     render();
-    // }).catch((err) => {
-    //   state.isLoading = false;
-    //   state.error = err.message || "An unexpected error occurred.";
-    //   render();
-  }, 3000); // 3000ms = 3 second delay <-- remove if not testing delay
-});
+  })
+  .catch((err) => {
+    state.isLoading = false;
+    state.error = err.message || "An unexpected error occurred.";
+    render();
+  });
