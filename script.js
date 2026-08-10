@@ -11,7 +11,7 @@ const state = {
 };
 
 // fetch all data from api
-const endpoint = "https://api.tvmaze.com/shows/82222222222222/episodes";
+const endpoint = "https://api.tvmaze.com/shows/82/episodes";
 
 const fetchAllEpisodes = async () => {
   const response = await fetch(endpoint);
