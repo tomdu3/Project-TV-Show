@@ -61,7 +61,10 @@ function render() {
 
   rootElem.textContent = "";
 
+  //show error state if something goes wrong with API call
+  //TODO: make error message look nicer with a big icon (and a button to try again, maybe?)
   if (state.error) {
+    // TODO:  possible change episodeCount name and element id for multiple purposes (count, loading, error, message...)
     episodeCount.textContent = "Error loading data";
     const errorElem = document.createElement("div");
     errorElem.className = "status-message error";
@@ -71,6 +74,9 @@ function render() {
     rootElem.append(errorElem);
     return;
   }
+
+  // show loading state while API call is in progress
+  // TODO: Make it look nicer with a spinner
 
   if (state.isLoading) {
     episodeCount.textContent = "Loading episodes...";
