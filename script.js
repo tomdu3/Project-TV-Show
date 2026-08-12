@@ -13,6 +13,14 @@ const state = {
 };
 
 // -----------------------------------------------------
+// DOM ELEMENTS
+// -----------------------------------------------------
+const episodeSelector = document.getElementById("episode-selector");
+const searchInput = document.getElementById("search-input");
+const clearSearchBtn = document.getElementById("clear-search-btn");
+const showSelector = document.getElementById("show-selector");
+
+// -----------------------------------------------------
 // FETCH API DATA
 // -----------------------------------------------------
 
@@ -177,9 +185,6 @@ function populateEpisodeSelector() {
 // REACT TO EVENTS
 // -----------------------------------------------------
 
-const searchInput = document.getElementById("search-input");
-const clearSearchBtn = document.getElementById("clear-search-btn");
-
 searchInput.addEventListener("input", handleSearchInput);
 
 function handleSearchInput(event) {
@@ -203,7 +208,6 @@ function handleSearchInput(event) {
 // ADD SHOW SELECTOR LISTENER AND HANDLER
 // -----------------------------------------------------
 
-const showSelector = document.getElementById("show-selector");
 showSelector.addeventListener("change", handleShowSelect);
 
 async function handleShowSelect(event) {
@@ -249,7 +253,6 @@ async function handleShowSelect(event) {
 }
 
 // episode selector
-const episodeSelector = document.getElementById("episode-selector");
 episodeSelector.addEventListener("change", handleEpisodeSelect);
 
 function handleEpisodeSelect(event) {
