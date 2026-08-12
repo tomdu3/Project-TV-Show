@@ -216,10 +216,38 @@ async function handleShowSelect(event) {
 
   //Reset UI elements
   searchInput.value = "";
-  episodeSe;
   episodeSector.value = "placeholder";
   clearSearchBtn.style.display = "none";
+
+  //Check if episodes have been fetched yet for this show
+  if (state.episodeCache[showId]) {
+    state.episodes = state.episodeCache[showId];
+    populateEpisodeSelector();
+    render;
+    //if no cache exists => fetch from the API
+  } else {
+    state.isLoading = true;
+    state.error = null;
+    render();
+
+    try {
+      const episodes = await fetchShowEpisodes(showId);
+      //store episodes in cache
+      state.episodeCache[showId] = episodes;
+      state.episodes = episodes;
+      state.isLoading = false;
+
+      populateEpisodeSelector();
+      render();
+      //handle errors from API
+    } catch (error) {
+      state.isLoading = false;
+      state.error = error.message || "An unexpected error occurrred";
+      render();
+    }
+  }
 }
+
 // episode selector
 const episodeSelector = document.getElementById("episode-selector");
 episodeSelector.addEventListener("change", handleEpisodeSelect);
