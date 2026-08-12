@@ -144,7 +144,7 @@ function populateShowSelector() {
   const selector = document.getElementById("show-selector");
 
   //sort alphabetically and case-insensitively
-  const sortedShows = [...stateShows].sort((a, b) =>
+  const sortedShows = [...state.shows].sort((a, b) =>
     a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
   );
 
@@ -208,7 +208,7 @@ function handleSearchInput(event) {
 // ADD SHOW SELECTOR LISTENER AND HANDLER
 // -----------------------------------------------------
 
-showSelector.addeventListener("change", handleShowSelect);
+showSelector.addEventListener("change", handleShowSelect);
 
 async function handleShowSelect(event) {
   const showId = event.target.value;
@@ -220,14 +220,14 @@ async function handleShowSelect(event) {
 
   //Reset UI elements
   searchInput.value = "";
-  episodeSector.value = "placeholder";
+  episodeSelector.value = "placeholder";
   clearSearchBtn.style.display = "none";
 
   //Check if episodes have been fetched yet for this show
   if (state.episodeCache[showId]) {
     state.episodes = state.episodeCache[showId];
     populateEpisodeSelector();
-    render;
+    render();
     //if no cache exists => fetch from the API
   } else {
     state.isLoading = true;
@@ -235,7 +235,7 @@ async function handleShowSelect(event) {
     render();
 
     try {
-      const episodes = await fetchShowEpisodes(showId);
+      const episodes = await fetchAllEpisodes(showId);
       //store episodes in cache
       state.episodeCache[showId] = episodes;
       state.episodes = episodes;
@@ -280,7 +280,7 @@ clearSearchBtn.addEventListener("click", () => {
 // -----------------------------------------------------
 render(); // Render loading state immediately while fetching
 
-fetchShows()
+fetchAllShows()
   .then(async (shows) => {
     state.shows = shows;
     populateShowSelector();
@@ -299,7 +299,7 @@ fetchShows()
       showSelector.value = defaultShow.id;
 
       //fetch and cache episodes  for default show
-      const episodes = await fetchShowEpisodes(defaultShow.id);
+      const episodes = await fetchAllEpisodes(defaultShow.id);
       state.episodeCache[defaultShow.id] = episodes;
       state.episodes = episodes;
     }
