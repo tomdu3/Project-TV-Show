@@ -242,7 +242,7 @@ async function handleShowSelect(event) {
       //handle errors from API
     } catch (error) {
       state.isLoading = false;
-      state.error = error.message || "An unexpected error occurrred";
+      state.error = error.message || "An unexpected error occurred";
       render();
     }
   }
@@ -287,7 +287,7 @@ fetchShows()
       a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
     );
 
-    //pick the first show for the defualt
+    //pick the first show for the default
     if (sortedShows.length > 0) {
       const defaultShow = sortedShows[0];
       state.selectedShowId = defaultShow.id;
@@ -296,7 +296,7 @@ fetchShows()
       showSelector.value = defaultShow.id;
 
       //fetch and cache episodes  for default show
-      const episodes = await fetchShowepisodes(defaultShow.id);
+      const episodes = await fetchShowEpisodes(defaultShow.id);
       state.episodeCache[defaultShow.id] = episodes;
       state.episodes = episodes;
     }
