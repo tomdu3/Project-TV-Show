@@ -10,7 +10,9 @@ const state = {
   error: null,
 };
 
-// fetch all data from api
+// -----------------------------------------------------
+// FETCH API DATA
+// -----------------------------------------------------
 const endpoint = "https://api.tvmaze.com/shows/82/episodes";
 
 const fetchAllEpisodes = async () => {
