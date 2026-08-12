@@ -272,18 +272,41 @@ clearSearchBtn.addEventListener("click", () => {
   render();
 });
 
-// Initialize the page
+// -----------------------------------------------------
+// INITIALISE THE PAGE
+// -----------------------------------------------------
 render(); // Render loading state immediately while fetching
 
-fetchAllEpisodes()
-  .then((episodes) => {
+fetchShows()
+  .then(async (shows) => {
+    state.shows = shows;
+    populateShowSelector();
+
+    //sort shows alphabetically
+    const sortedShows = [...shows].sort((a, b) =>
+      a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
+    );
+
+    //pick the first show for the defualt
+    if (sortedShows.length > 0) {
+      const defaultShow = sortedShows[0];
+      state.selectedShowId = defaultShow.id;
+
+      //update dropdown selection in UI
+      showSelector.value = defaultShow.id;
+
+      //fetch and cache episodes  for default show
+      const episodes = await fetchShowepisodes(defaultShow.id);
+      state.episodeCache[defaultShow.id] = episodes;
+      state.episodes = episodes;
+    }
+
     state.isLoading = false;
-    state.episodes = episodes;
     populateEpisodeSelector();
     render();
   })
-  .catch((err) => {
+  .catch((error) => {
     state.isLoading = false;
-    state.error = err.message || "An unexpected error occurred.";
+    state.error = error.message || "An unexpected error occurred";
     render();
   });
