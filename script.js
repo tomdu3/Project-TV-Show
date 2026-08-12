@@ -3,18 +3,39 @@
 // -----------------------------------------------------
 
 const state = {
+  shows: [],
   episodes: [],
   searchTerm: "",
   selectedEpisodeCode: "",
   isLoading: true,
   error: null,
+  episodeCache: {},
 };
 
-// fetch all data from api
-const endpoint = "https://api.tvmaze.com/shows/82/episodes";
+// -----------------------------------------------------
+// DOM ELEMENTS
+// -----------------------------------------------------
+const episodeSelector = document.getElementById("episode-selector");
+const searchInput = document.getElementById("search-input");
+const clearSearchBtn = document.getElementById("clear-search-btn");
+const showSelector = document.getElementById("show-selector");
 
-const fetchAllEpisodes = async () => {
-  const response = await fetch(endpoint);
+// -----------------------------------------------------
+// FETCH API DATA
+// -----------------------------------------------------
+
+const fetchAllShows = async () => {
+  const response = await fetch("https://api.tvmaze.com/shows");
+  if (!response.ok) {
+    throw new Error(`HTTP error ${response.status} (${response.statusText})`);
+  }
+  return await response.json();
+};
+
+const fetchAllEpisodes = async (showId) => {
+  const response = await fetch(
+    `https://api.tvmaze.com/shows/${showId}/episodes`,
+  );
   if (!response.ok) {
     throw new Error(`HTTP error ${response.status} (${response.statusText})`);
   }
@@ -117,12 +138,37 @@ function render() {
 }
 
 // -----------------------------------------------------
+// SHOW SELECTOR (dropdown)
+// -----------------------------------------------------
+function populateShowSelector() {
+  const selector = document.getElementById("show-selector");
+
+  //sort alphabetically and case-insensitively
+  const sortedShows = [...state.shows].sort((a, b) =>
+    a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
+  );
+
+  // Loop through every episode and add it as an <option>
+  sortedShows.forEach((show) => {
+    const option = document.createElement("option");
+    option.value = show.id;
+    option.textContent = show.name;
+
+    selector.append(option);
+  });
+}
+// -----------------------------------------------------
 // EPISODE SELECTOR (dropdown)
 // -----------------------------------------------------
 
 function populateEpisodeSelector() {
   const selector = document.getElementById("episode-selector");
 
+  //clear prvious options except the placeholder
+  selector.innerHTML = `
+  <option value="placeholder" disabled selected hidden>All episodes or Select...</option>
+  <option value="">All episodes or Select...</option>
+  `;
   // Loop through every episode and add it as an <option>
   state.episodes.forEach((episode) => {
     const episodeCode = getEpisodeCode(episode);
@@ -138,9 +184,6 @@ function populateEpisodeSelector() {
 // -----------------------------------------------------
 // REACT TO EVENTS
 // -----------------------------------------------------
-
-const searchInput = document.getElementById("search-input");
-const clearSearchBtn = document.getElementById("clear-search-btn");
 
 searchInput.addEventListener("input", handleSearchInput);
 
@@ -161,8 +204,55 @@ function handleSearchInput(event) {
   render();
 }
 
+// -----------------------------------------------------
+// ADD SHOW SELECTOR LISTENER AND HANDLER
+// -----------------------------------------------------
+
+showSelector.addEventListener("change", handleShowSelect);
+
+async function handleShowSelect(event) {
+  const showId = event.target.value;
+  if (showId === "placeholder") return;
+
+  //update JS state
+  state.searchTerm = "";
+  state.selectedEpisodeCode = "";
+
+  //Reset UI elements
+  searchInput.value = "";
+  episodeSelector.value = "placeholder";
+  clearSearchBtn.style.display = "none";
+
+  //Check if episodes have been fetched yet for this show
+  if (state.episodeCache[showId]) {
+    state.episodes = state.episodeCache[showId];
+    populateEpisodeSelector();
+    render();
+    //if no cache exists => fetch from the API
+  } else {
+    state.isLoading = true;
+    state.error = null;
+    render();
+
+    try {
+      const episodes = await fetchAllEpisodes(showId);
+      //store episodes in cache
+      state.episodeCache[showId] = episodes;
+      state.episodes = episodes;
+      state.isLoading = false;
+
+      populateEpisodeSelector();
+      render();
+      //handle errors from API
+    } catch (error) {
+      state.isLoading = false;
+      state.error = error.message || "An unexpected error occurred";
+      render();
+    }
+  }
+}
+
 // episode selector
-const episodeSelector = document.getElementById("episode-selector");
 episodeSelector.addEventListener("change", handleEpisodeSelect);
 
 function handleEpisodeSelect(event) {
@@ -185,18 +275,41 @@ clearSearchBtn.addEventListener("click", () => {
   render();
 });
 
-// Initialize the page
+// -----------------------------------------------------
+// INITIALISE THE PAGE
+// -----------------------------------------------------
 render(); // Render loading state immediately while fetching
 
-fetchAllEpisodes()
-  .then((episodes) => {
+fetchAllShows()
+  .then(async (shows) => {
+    state.shows = shows;
+    populateShowSelector();
+
+    //sort shows alphabetically
+    const sortedShows = [...shows].sort((a, b) =>
+      a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
+    );
+
+    //pick the first show for the default
+    if (sortedShows.length > 0) {
+      const defaultShow = sortedShows[0];
+      state.selectedShowId = defaultShow.id;
+
+      //update dropdown selection in UI
+      showSelector.value = defaultShow.id;
+
+      //fetch and cache episodes  for default show
+      const episodes = await fetchAllEpisodes(defaultShow.id);
+      state.episodeCache[defaultShow.id] = episodes;
+      state.episodes = episodes;
+    }
+
     state.isLoading = false;
-    state.episodes = episodes;
     populateEpisodeSelector();
     render();
   })
-  .catch((err) => {
+  .catch((error) => {
     state.isLoading = false;
-    state.error = err.message || "An unexpected error occurred.";
+    state.error = error.message || "An unexpected error occurred";
     render();
   });
