@@ -135,13 +135,16 @@ function render() {
 function populateShowSelector() {
   const selector = document.getElementById("show-selector");
 
-  // Loop through every episode and add it as an <option>
-  state.shows.forEach((show) => {
-    const showCode = getShowCode(show);
+  //sort alphabetically and case-insensitively
+  const sortedShows = [...stateShows].sort((a, b) =>
+    a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
+  );
 
+  // Loop through every episode and add it as an <option>
+  sortedShows.forEach((show) => {
     const option = document.createElement("option");
-    option.value = showCode;
-    option.textContent = `${showCode} - ${show.name}`;
+    option.value = show.id;
+    option.textContent = show.name;
 
     selector.append(option);
   });
