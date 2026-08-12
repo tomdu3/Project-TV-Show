@@ -156,6 +156,11 @@ function populateShowSelector() {
 function populateEpisodeSelector() {
   const selector = document.getElementById("episode-selector");
 
+  //clear prvious options except the placeholder
+  selector.innerHTML = `
+  <option value="placeholder" disabled selected hidden>All episodes or Select...</option>
+  <option value="">All episodes or Select...</option>
+  `;
   // Loop through every episode and add it as an <option>
   state.episodes.forEach((episode) => {
     const episodeCode = getEpisodeCode(episode);
