@@ -130,6 +130,23 @@ function render() {
 }
 
 // -----------------------------------------------------
+// SHOW SELECTOR (dropdown)
+// -----------------------------------------------------
+function populateShowSelector() {
+  const selector = document.getElementById("show-selector");
+
+  // Loop through every episode and add it as an <option>
+  state.shows.forEach((show) => {
+    const showCode = getShowCode(show);
+
+    const option = document.createElement("option");
+    option.value = showCode;
+    option.textContent = `${showCode} - ${show.name}`;
+
+    selector.append(option);
+  });
+}
+// -----------------------------------------------------
 // EPISODE SELECTOR (dropdown)
 // -----------------------------------------------------
 
