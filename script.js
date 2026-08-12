@@ -8,6 +8,7 @@ const state = {
   selectedEpisodeCode: "",
   isLoading: true,
   error: null,
+  episodeCache: {},
 };
 
 // -----------------------------------------------------
