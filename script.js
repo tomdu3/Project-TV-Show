@@ -199,6 +199,27 @@ function handleSearchInput(event) {
   render();
 }
 
+// -----------------------------------------------------
+// ADD SHOW SELECTOR LISTENER AND HANDLER
+// -----------------------------------------------------
+
+const showSelector = document.getElementById("show-selector");
+showSelector.addeventListener("change", handleShowSelect);
+
+async function handleShowSelect(event) {
+  const showId = event.target.value;
+  if (showId === "placeholder") return;
+
+  //update JS state
+  state.searchTerm = "";
+  state.selectedEpisodeCode = "";
+
+  //Reset UI elements
+  searchInput.value = "";
+  episodeSe;
+  episodeSector.value = "placeholder";
+  clearSearchBtn.style.display = "none";
+}
 // episode selector
 const episodeSelector = document.getElementById("episode-selector");
 episodeSelector.addEventListener("change", handleEpisodeSelect);
