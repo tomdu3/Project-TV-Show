@@ -15,10 +15,19 @@ const state = {
 // -----------------------------------------------------
 // FETCH API DATA
 // -----------------------------------------------------
-const endpoint = "https://api.tvmaze.com/shows/82/episodes";
 
-const fetchAllEpisodes = async () => {
-  const response = await fetch(endpoint);
+const fetchAllShows = async () => {
+  const response = await fetch("https://api.tvmaze.com/shows");
+  if (!response.ok) {
+    throw new Error(`HTTP error ${response.status} (${response.statusText})`);
+  }
+  return await response.json();
+};
+
+const fetchAllEpisodes = async (showId) => {
+  const response = await fetch(
+    `https://api.tvmaze.com/shows/${showId}/episodes`,
+  );
   if (!response.ok) {
     throw new Error(`HTTP error ${response.status} (${response.statusText})`);
   }
