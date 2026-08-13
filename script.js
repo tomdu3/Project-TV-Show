@@ -3,8 +3,10 @@
 // -----------------------------------------------------
 
 const state = {
+  viewMode: "shows", // "shows" or "episodes"
   shows: [],
   episodes: [],
+  selectedShowId: "",
   searchTerm: "",
   selectedEpisodeCode: "",
   isLoading: true,
@@ -19,6 +21,8 @@ const episodeSelector = document.getElementById("episode-selector");
 const searchInput = document.getElementById("search-input");
 const clearSearchBtn = document.getElementById("clear-search-btn");
 const showSelector = document.getElementById("show-selector");
+const backToShowsBtn = document.getElementById("back-to-shows-btn");
+const selectedShowTitle = document.getElementById("selected-show-title");
 
 // -----------------------------------------------------
 // FETCH API DATA
@@ -52,6 +56,37 @@ function getEpisodeCode(episode) {
 }
 
 // -----------------------------------------------------
+// MAKE ONE SHOW CARD
+// -----------------------------------------------------
+function displayShowCard(show) {
+  const card = document.getElementById("show-card").content.cloneNode(true);
+
+  const titleElem = card.querySelector(".show-title");
+  titleElem.textContent = show.name;
+  titleElem.dataset.showId = show.id;
+
+  titleElem.addEventListener("click", () => {
+    selectShow(show.id);
+  });
+
+  const imgElem = card.querySelector(".show-img");
+  imgElem.src = show.image?.medium || "";
+  imgElem.alt = `${show.name} cover image`;
+
+  card.querySelector(".show-summary").textContent = (show.summary || "").replace(
+    /<[^>]*>/g,
+    "",
+  );
+
+  card.querySelector(".show-rating").textContent = show.rating?.average || "N/A";
+  card.querySelector(".show-genres").textContent = show.genres?.join(" | ") || "N/A";
+  card.querySelector(".show-status").textContent = show.status || "N/A";
+  card.querySelector(".show-runtime").textContent = show.runtime || "N/A";
+
+  return card;
+}
+
+// -----------------------------------------------------
 // MAKE ONE EPISODE CARD
 // -----------------------------------------------------
 function displayEpisodeCard(episode) {
@@ -77,37 +112,78 @@ function displayEpisodeCard(episode) {
 // RENDER
 // -----------------------------------------------------
 function render() {
-  const rootElem = document.getElementById("root");
-  const episodeCount = document.getElementById("episode-count");
+  const cardsContainer = document.getElementById("cards-container");
+  const countElem = document.getElementById("episode-count");
 
-  rootElem.textContent = "";
+  cardsContainer.textContent = "";
 
-  //show error state if something goes wrong with API call
-  //TODO: make error message look nicer with a big icon (and a button to try again, maybe?)
   if (state.error) {
-    // TODO:  possible change episodeCount name and element id for multiple purposes (count, loading, error, message...)
-    episodeCount.textContent = "Error loading data";
+    countElem.textContent = "Error loading data";
     const errorElem = document.createElement("div");
     errorElem.className = "status-message error";
     errorElem.innerHTML = `
-      <p>⚠️ Failed to load episodes: ${state.error}.</p>
+      <p>⚠️ Failed to load data: ${state.error}.</p>
     `;
-    rootElem.append(errorElem);
+    cardsContainer.append(errorElem);
     return;
   }
 
-  // show loading state while API call is in progress
-  // TODO: Make it look nicer with a spinner
-
   if (state.isLoading) {
-    episodeCount.textContent = "Loading episodes...";
+    countElem.textContent = "Loading data...";
     const loadingElem = document.createElement("div");
     loadingElem.className = "status-message loading";
     loadingElem.innerHTML = `
-      <p>Loading episodes, please wait...</p>
+      <p>⌛ Loading data, please wait...</p>
     `;
-    rootElem.append(loadingElem);
+    cardsContainer.append(loadingElem);
     return;
+  }
+
+  if (state.viewMode === "shows") {
+    cardsContainer.classList.remove("episodes-grid");
+    showSelector.style.display = "inline-block";
+    backToShowsBtn.style.display = "none";
+    episodeSelector.style.display = "none";
+    selectedShowTitle.style.display = "none";
+    searchInput.placeholder = "Search for a show...";
+
+    let filteredShows = state.shows;
+
+    if (state.searchTerm) {
+      const searchTerm = state.searchTerm.toLowerCase();
+      filteredShows = state.shows.filter((show) => {
+        const name = show.name.toLowerCase();
+        const summary = (show.summary || "")
+          .replace(/<[^>]*>/g, "")
+          .toLowerCase();
+        const genres = (show.genres || []).join(" ").toLowerCase();
+
+        return (
+          name.includes(searchTerm) ||
+          summary.includes(searchTerm) ||
+          genres.includes(searchTerm)
+        );
+      });
+    }
+
+    const showCards = filteredShows.map(displayShowCard);
+    cardsContainer.append(...showCards);
+    countElem.textContent = `Displaying ${filteredShows.length} of ${state.shows.length} shows`;
+    return;
+  }
+
+  cardsContainer.classList.add("episodes-grid");
+  showSelector.style.display = "none";
+  backToShowsBtn.style.display = "inline-block";
+  episodeSelector.style.display = "inline-block";
+  searchInput.placeholder = "Search for an episode...";
+
+  const currentShow = state.shows.find(
+    (show) => String(show.id) === String(state.selectedShowId),
+  );
+  if (currentShow) {
+    selectedShowTitle.textContent = currentShow.name;
+    selectedShowTitle.style.display = "block";
   }
 
   let filteredEpisodes = state.episodes;
@@ -129,32 +205,21 @@ function render() {
   }
 
   const episodeCards = filteredEpisodes.map(displayEpisodeCard);
-
-  //add the newly created cards
-  rootElem.append(...episodeCards);
-
-  //display the number of current search match
-  episodeCount.textContent = `Displaying ${filteredEpisodes.length} of ${state.episodes.length} episodes`;
+  cardsContainer.append(...episodeCards);
+  countElem.textContent = `Displaying ${filteredEpisodes.length} of ${state.episodes.length} episodes`;
 }
 
 // -----------------------------------------------------
 // SHOW SELECTOR (dropdown)
 // -----------------------------------------------------
 function populateShowSelector() {
-  const selector = document.getElementById("show-selector");
-
-  //sort alphabetically and case-insensitively
-  const sortedShows = [...state.shows].sort((a, b) =>
-    a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
-  );
-
-  // Loop through every episode and add it as an <option>
-  sortedShows.forEach((show) => {
+  // Loop through every show and add it as an <option>
+  state.shows.forEach((show) => {
     const option = document.createElement("option");
     option.value = show.id;
     option.textContent = show.name;
 
-    selector.append(option);
+    showSelector.append(option);
   });
 }
 // -----------------------------------------------------
@@ -162,10 +227,8 @@ function populateShowSelector() {
 // -----------------------------------------------------
 
 function populateEpisodeSelector() {
-  const selector = document.getElementById("episode-selector");
-
   //clear prvious options except the placeholder
-  selector.innerHTML = `
+  episodeSelector.innerHTML = `
   <option value="placeholder" disabled selected hidden>All episodes or Select...</option>
   <option value="">All episodes or Select...</option>
   `;
@@ -177,7 +240,7 @@ function populateEpisodeSelector() {
     option.value = episodeCode;
     option.textContent = `${episodeCode} - ${episode.name}`;
 
-    selector.append(option);
+    episodeSelector.append(option);
   });
 }
 
@@ -193,10 +256,10 @@ function handleSearchInput(event) {
   state.selectedEpisodeCode = ""; // Reset selector state
 
   if (searchTerm) {
-    document.getElementById("episode-selector").value = "placeholder"; // Set to hidden placeholder
+    episodeSelector.value = "placeholder"; // Set to hidden placeholder
     clearSearchBtn.style.display = "inline-block";
   } else {
-    document.getElementById("episode-selector").value = "placeholder"; // Reset back to default
+    episodeSelector.value = "placeholder"; // Reset back to default
     clearSearchBtn.style.display = "none";
   }
 
@@ -210,25 +273,32 @@ function handleSearchInput(event) {
 
 showSelector.addEventListener("change", handleShowSelect);
 
-async function handleShowSelect(event) {
+function handleShowSelect(event) {
   const showId = event.target.value;
   if (showId === "placeholder") return;
+  selectShow(showId);
+}
 
-  //update JS state
+async function selectShow(showId) {
+  // Update state to episode view mode and set current show
+  state.selectedShowId = showId;
+  state.viewMode = "episodes";
+  showSelector.value = showId;
+
+  // Reset search and selector state
   state.searchTerm = "";
   state.selectedEpisodeCode = "";
 
-  //Reset UI elements
+  // Reset UI elements
   searchInput.value = "";
   episodeSelector.value = "placeholder";
   clearSearchBtn.style.display = "none";
 
-  //Check if episodes have been fetched yet for this show
+  // Check if episodes have been fetched yet for this show
   if (state.episodeCache[showId]) {
     state.episodes = state.episodeCache[showId];
     populateEpisodeSelector();
     render();
-    //if no cache exists => fetch from the API
   } else {
     state.isLoading = true;
     state.error = null;
@@ -236,14 +306,13 @@ async function handleShowSelect(event) {
 
     try {
       const episodes = await fetchAllEpisodes(showId);
-      //store episodes in cache
+      // Store episodes in cache
       state.episodeCache[showId] = episodes;
       state.episodes = episodes;
       state.isLoading = false;
 
       populateEpisodeSelector();
       render();
-      //handle errors from API
     } catch (error) {
       state.isLoading = false;
       state.error = error.message || "An unexpected error occurred";
@@ -261,7 +330,7 @@ function handleEpisodeSelect(event) {
 
   state.selectedEpisodeCode = selectedCode;
   state.searchTerm = ""; // Reset search term
-  document.getElementById("search-input").value = ""; // Reset search input visually
+  searchInput.value = ""; // Reset search input visually
   clearSearchBtn.style.display = "none";
 
   render();
@@ -270,7 +339,17 @@ function handleEpisodeSelect(event) {
 clearSearchBtn.addEventListener("click", () => {
   searchInput.value = "";
   state.searchTerm = "";
-  document.getElementById("episode-selector").value = "placeholder"; // Reset dropdown visually
+  episodeSelector.value = "placeholder"; // Reset dropdown visually
+  clearSearchBtn.style.display = "none";
+  render();
+});
+
+backToShowsBtn.addEventListener("click", () => {
+  state.viewMode = "shows";
+  state.searchTerm = "";
+  state.selectedEpisodeCode = "";
+  searchInput.value = "";
+  showSelector.value = "placeholder";
   clearSearchBtn.style.display = "none";
   render();
 });
@@ -281,31 +360,15 @@ clearSearchBtn.addEventListener("click", () => {
 render(); // Render loading state immediately while fetching
 
 fetchAllShows()
-  .then(async (shows) => {
-    state.shows = shows;
-    populateShowSelector();
-
-    //sort shows alphabetically
-    const sortedShows = [...shows].sort((a, b) =>
+  .then((shows) => {
+    // Sort shows alphabetically once and store in state
+    state.shows = shows.sort((a, b) =>
       a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
     );
+    populateShowSelector();
 
-    //pick the first show for the default
-    if (sortedShows.length > 0) {
-      const defaultShow = sortedShows[0];
-      state.selectedShowId = defaultShow.id;
-
-      //update dropdown selection in UI
-      showSelector.value = defaultShow.id;
-
-      //fetch and cache episodes  for default show
-      const episodes = await fetchAllEpisodes(defaultShow.id);
-      state.episodeCache[defaultShow.id] = episodes;
-      state.episodes = episodes;
-    }
-
+    state.viewMode = "shows";
     state.isLoading = false;
-    populateEpisodeSelector();
     render();
   })
   .catch((error) => {
