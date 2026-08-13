@@ -105,7 +105,7 @@ function render() {
     const loadingElem = document.createElement("div");
     loadingElem.className = "status-message loading";
     loadingElem.innerHTML = `
-      <p>Loading episodes, please wait...</p>
+      <p>⌛ Loading episodes, please wait...</p>
     `;
     rootElem.append(loadingElem);
     return;
