@@ -2,10 +2,13 @@
   box-sizing: border-box;
 }
 
-body {
-  background: #ebecf0;
-  min-height: 100vh;
-  margin: 0;
+.current-show-title {
+  text-align: center;
+  font-size: 2rem;
+  color: #1a252f;
+  margin: 0 auto 1.5rem auto;
+  max-width: 1200px;
+  padding: 0 1rem;
 }
 
 #cards-container {

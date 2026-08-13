@@ -22,6 +22,7 @@ const searchInput = document.getElementById("search-input");
 const clearSearchBtn = document.getElementById("clear-search-btn");
 const showSelector = document.getElementById("show-selector");
 const backToShowsBtn = document.getElementById("back-to-shows-btn");
+const selectedShowTitle = document.getElementById("selected-show-title");
 
 // -----------------------------------------------------
 // FETCH API DATA
@@ -143,6 +144,7 @@ function render() {
     showSelector.style.display = "inline-block";
     backToShowsBtn.style.display = "none";
     episodeSelector.style.display = "none";
+    selectedShowTitle.style.display = "none";
     searchInput.placeholder = "Search for a show...";
 
     let filteredShows = state.shows;
@@ -175,6 +177,14 @@ function render() {
   backToShowsBtn.style.display = "inline-block";
   episodeSelector.style.display = "inline-block";
   searchInput.placeholder = "Search for an episode...";
+
+  const currentShow = state.shows.find(
+    (show) => String(show.id) === String(state.selectedShowId),
+  );
+  if (currentShow) {
+    selectedShowTitle.textContent = currentShow.name;
+    selectedShowTitle.style.display = "block";
+  }
 
   let filteredEpisodes = state.episodes;
 
