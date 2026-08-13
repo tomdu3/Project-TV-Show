@@ -145,9 +145,28 @@ function render() {
     episodeSelector.style.display = "none";
     searchInput.placeholder = "Search for a show...";
 
-    const showCards = state.shows.map(displayShowCard);
+    let filteredShows = state.shows;
+
+    if (state.searchTerm) {
+      const searchTerm = state.searchTerm.toLowerCase();
+      filteredShows = state.shows.filter((show) => {
+        const name = show.name.toLowerCase();
+        const summary = (show.summary || "")
+          .replace(/<[^>]*>/g, "")
+          .toLowerCase();
+        const genres = (show.genres || []).join(" ").toLowerCase();
+
+        return (
+          name.includes(searchTerm) ||
+          summary.includes(searchTerm) ||
+          genres.includes(searchTerm)
+        );
+      });
+    }
+
+    const showCards = filteredShows.map(displayShowCard);
     cardsContainer.append(...showCards);
-    countElem.textContent = `Displaying ${state.shows.length} shows`;
+    countElem.textContent = `Displaying ${filteredShows.length} of ${state.shows.length} shows`;
     return;
   }
 
