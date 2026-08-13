@@ -5,6 +5,7 @@
 const state = {
   shows: [],
   episodes: [],
+  selectedShowId: "",
   searchTerm: "",
   selectedEpisodeCode: "",
   isLoading: true,
