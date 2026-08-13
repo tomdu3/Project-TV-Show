@@ -144,13 +144,8 @@ function render() {
 function populateShowSelector() {
   const selector = document.getElementById("show-selector");
 
-  //sort alphabetically and case-insensitively
-  const sortedShows = [...state.shows].sort((a, b) =>
-    a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
-  );
-
-  // Loop through every episode and add it as an <option>
-  sortedShows.forEach((show) => {
+  // Loop through every show and add it as an <option>
+  state.shows.forEach((show) => {
     const option = document.createElement("option");
     option.value = show.id;
     option.textContent = show.name;
@@ -283,23 +278,21 @@ render(); // Render loading state immediately while fetching
 
 fetchAllShows()
   .then(async (shows) => {
-    state.shows = shows;
-    populateShowSelector();
-
-    //sort shows alphabetically
-    const sortedShows = [...shows].sort((a, b) =>
+    // Sort shows alphabetically once and store in state
+    state.shows = shows.sort((a, b) =>
       a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
     );
+    populateShowSelector();
 
-    //pick the first show for the default
-    if (sortedShows.length > 0) {
-      const defaultShow = sortedShows[0];
+    // Pick the first show for the default
+    if (state.shows.length > 0) {
+      const defaultShow = state.shows[0];
       state.selectedShowId = defaultShow.id;
 
-      //update dropdown selection in UI
+      // Update dropdown selection in UI
       showSelector.value = defaultShow.id;
 
-      //fetch and cache episodes  for default show
+      // Fetch and cache episodes for default show
       const episodes = await fetchAllEpisodes(defaultShow.id);
       state.episodeCache[defaultShow.id] = episodes;
       state.episodes = episodes;
