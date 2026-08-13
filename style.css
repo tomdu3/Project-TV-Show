@@ -62,9 +62,12 @@ section.show-card {
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
+  border-top: 1px solid #1a252f;
 
   .show-title {
     margin-top: 0;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e9ecef;
     font-size: 1.5rem;
     color: #1a252f;
     cursor: pointer;
@@ -168,7 +171,9 @@ footer {
   cursor: pointer;
   font-weight: 600;
   color: #1a252f;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .nav-btn:hover {
