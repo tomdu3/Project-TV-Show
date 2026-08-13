@@ -163,6 +163,8 @@ footer {
 }
 
 .nav-btn {
+  min-width: auto;
+  padding: 0.8rem 1rem;
   cursor: pointer;
   font-weight: 600;
   color: #1a252f;
