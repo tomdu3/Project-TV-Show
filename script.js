@@ -142,15 +142,13 @@ function render() {
 // SHOW SELECTOR (dropdown)
 // -----------------------------------------------------
 function populateShowSelector() {
-  const selector = document.getElementById("show-selector");
-
   // Loop through every show and add it as an <option>
   state.shows.forEach((show) => {
     const option = document.createElement("option");
     option.value = show.id;
     option.textContent = show.name;
 
-    selector.append(option);
+    showSelector.append(option);
   });
 }
 // -----------------------------------------------------
@@ -158,10 +156,8 @@ function populateShowSelector() {
 // -----------------------------------------------------
 
 function populateEpisodeSelector() {
-  const selector = document.getElementById("episode-selector");
-
   //clear prvious options except the placeholder
-  selector.innerHTML = `
+  episodeSelector.innerHTML = `
   <option value="placeholder" disabled selected hidden>All episodes or Select...</option>
   <option value="">All episodes or Select...</option>
   `;
@@ -173,7 +169,7 @@ function populateEpisodeSelector() {
     option.value = episodeCode;
     option.textContent = `${episodeCode} - ${episode.name}`;
 
-    selector.append(option);
+    episodeSelector.append(option);
   });
 }
 
@@ -189,10 +185,10 @@ function handleSearchInput(event) {
   state.selectedEpisodeCode = ""; // Reset selector state
 
   if (searchTerm) {
-    document.getElementById("episode-selector").value = "placeholder"; // Set to hidden placeholder
+    episodeSelector.value = "placeholder"; // Set to hidden placeholder
     clearSearchBtn.style.display = "inline-block";
   } else {
-    document.getElementById("episode-selector").value = "placeholder"; // Reset back to default
+    episodeSelector.value = "placeholder"; // Reset back to default
     clearSearchBtn.style.display = "none";
   }
 
@@ -257,7 +253,7 @@ function handleEpisodeSelect(event) {
 
   state.selectedEpisodeCode = selectedCode;
   state.searchTerm = ""; // Reset search term
-  document.getElementById("search-input").value = ""; // Reset search input visually
+  searchInput.value = ""; // Reset search input visually
   clearSearchBtn.style.display = "none";
 
   render();
@@ -266,7 +262,7 @@ function handleEpisodeSelect(event) {
 clearSearchBtn.addEventListener("click", () => {
   searchInput.value = "";
   state.searchTerm = "";
-  document.getElementById("episode-selector").value = "placeholder"; // Reset dropdown visually
+  episodeSelector.value = "placeholder"; // Reset dropdown visually
   clearSearchBtn.style.display = "none";
   render();
 });
