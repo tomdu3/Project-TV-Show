@@ -98,6 +98,7 @@ section.show-card {
     border-radius: 10px;
     padding: 1rem;
     flex-shrink: 0;
+    align-self: flex-start;
 
     p {
       padding: 0;
