@@ -64,6 +64,12 @@ section.show-card {
     margin-top: 0;
     font-size: 1.5rem;
     color: #1a252f;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  .show-title:hover {
+    color: #2980b9;
   }
 
   .show-body {

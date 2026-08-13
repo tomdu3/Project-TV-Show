@@ -63,6 +63,10 @@ function displayShowCard(show) {
   titleElem.textContent = show.name;
   titleElem.dataset.showId = show.id;
 
+  titleElem.addEventListener("click", () => {
+    selectShow(show.id);
+  });
+
   const imgElem = card.querySelector(".show-img");
   imgElem.src = show.image?.medium || "";
   imgElem.alt = `${show.name} cover image`;
@@ -230,25 +234,32 @@ function handleSearchInput(event) {
 
 showSelector.addEventListener("change", handleShowSelect);
 
-async function handleShowSelect(event) {
+function handleShowSelect(event) {
   const showId = event.target.value;
   if (showId === "placeholder") return;
+  selectShow(showId);
+}
 
-  //update JS state
+async function selectShow(showId) {
+  // Update state to episode view mode and set current show
+  state.selectedShowId = showId;
+  state.viewMode = "episodes";
+  showSelector.value = showId;
+
+  // Reset search and selector state
   state.searchTerm = "";
   state.selectedEpisodeCode = "";
 
-  //Reset UI elements
+  // Reset UI elements
   searchInput.value = "";
   episodeSelector.value = "placeholder";
   clearSearchBtn.style.display = "none";
 
-  //Check if episodes have been fetched yet for this show
+  // Check if episodes have been fetched yet for this show
   if (state.episodeCache[showId]) {
     state.episodes = state.episodeCache[showId];
     populateEpisodeSelector();
     render();
-    //if no cache exists => fetch from the API
   } else {
     state.isLoading = true;
     state.error = null;
@@ -256,14 +267,13 @@ async function handleShowSelect(event) {
 
     try {
       const episodes = await fetchAllEpisodes(showId);
-      //store episodes in cache
+      // Store episodes in cache
       state.episodeCache[showId] = episodes;
       state.episodes = episodes;
       state.isLoading = false;
 
       populateEpisodeSelector();
       render();
-      //handle errors from API
     } catch (error) {
       state.isLoading = false;
       state.error = error.message || "An unexpected error occurred";
