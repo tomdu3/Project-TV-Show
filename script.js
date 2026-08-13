@@ -21,6 +21,7 @@ const episodeSelector = document.getElementById("episode-selector");
 const searchInput = document.getElementById("search-input");
 const clearSearchBtn = document.getElementById("clear-search-btn");
 const showSelector = document.getElementById("show-selector");
+const backToShowsBtn = document.getElementById("back-to-shows-btn");
 
 // -----------------------------------------------------
 // FETCH API DATA
@@ -139,6 +140,11 @@ function render() {
 
   if (state.viewMode === "shows") {
     cardsContainer.classList.remove("episodes-grid");
+    showSelector.style.display = "inline-block";
+    backToShowsBtn.style.display = "none";
+    episodeSelector.style.display = "none";
+    searchInput.placeholder = "Search for a show...";
+
     const showCards = state.shows.map(displayShowCard);
     cardsContainer.append(...showCards);
     countElem.textContent = `Displaying ${state.shows.length} shows`;
@@ -146,6 +152,10 @@ function render() {
   }
 
   cardsContainer.classList.add("episodes-grid");
+  showSelector.style.display = "none";
+  backToShowsBtn.style.display = "inline-block";
+  episodeSelector.style.display = "inline-block";
+  searchInput.placeholder = "Search for an episode...";
 
   let filteredEpisodes = state.episodes;
 
@@ -301,6 +311,16 @@ clearSearchBtn.addEventListener("click", () => {
   searchInput.value = "";
   state.searchTerm = "";
   episodeSelector.value = "placeholder"; // Reset dropdown visually
+  clearSearchBtn.style.display = "none";
+  render();
+});
+
+backToShowsBtn.addEventListener("click", () => {
+  state.viewMode = "shows";
+  state.searchTerm = "";
+  state.selectedEpisodeCode = "";
+  searchInput.value = "";
+  showSelector.value = "placeholder";
   clearSearchBtn.style.display = "none";
   render();
 });
