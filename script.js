@@ -3,6 +3,7 @@
 // -----------------------------------------------------
 
 const state = {
+  viewMode: "shows", // "shows" or "episodes"
   shows: [],
   episodes: [],
   selectedShowId: "",
@@ -53,6 +54,33 @@ function getEpisodeCode(episode) {
 }
 
 // -----------------------------------------------------
+// MAKE ONE SHOW CARD
+// -----------------------------------------------------
+function displayShowCard(show) {
+  const card = document.getElementById("show-card").content.cloneNode(true);
+
+  const titleElem = card.querySelector(".show-title");
+  titleElem.textContent = show.name;
+  titleElem.dataset.showId = show.id;
+
+  const imgElem = card.querySelector(".show-img");
+  imgElem.src = show.image?.medium || "";
+  imgElem.alt = `${show.name} cover image`;
+
+  card.querySelector(".show-summary").textContent = (show.summary || "").replace(
+    /<[^>]*>/g,
+    "",
+  );
+
+  card.querySelector(".show-rating").textContent = show.rating?.average || "N/A";
+  card.querySelector(".show-genres").textContent = show.genres?.join(" | ") || "N/A";
+  card.querySelector(".show-status").textContent = show.status || "N/A";
+  card.querySelector(".show-runtime").textContent = show.runtime || "N/A";
+
+  return card;
+}
+
+// -----------------------------------------------------
 // MAKE ONE EPISODE CARD
 // -----------------------------------------------------
 function displayEpisodeCard(episode) {
@@ -78,38 +106,42 @@ function displayEpisodeCard(episode) {
 // RENDER
 // -----------------------------------------------------
 function render() {
-  const rootElem = document.getElementById("cards-container");
-  const episodeCount = document.getElementById("episode-count");
+  const cardsContainer = document.getElementById("cards-container");
+  const countElem = document.getElementById("episode-count");
 
-  rootElem.textContent = "";
+  cardsContainer.textContent = "";
 
-  //show error state if something goes wrong with API call
-  //TODO: make error message look nicer with a big icon (and a button to try again, maybe?)
   if (state.error) {
-    // TODO:  possible change episodeCount name and element id for multiple purposes (count, loading, error, message...)
-    episodeCount.textContent = "Error loading data";
+    countElem.textContent = "Error loading data";
     const errorElem = document.createElement("div");
     errorElem.className = "status-message error";
     errorElem.innerHTML = `
-      <p>⚠️ Failed to load episodes: ${state.error}.</p>
+      <p>⚠️ Failed to load data: ${state.error}.</p>
     `;
-    rootElem.append(errorElem);
+    cardsContainer.append(errorElem);
     return;
   }
 
-  // show loading state while API call is in progress
-  // TODO: Make it look nicer with a spinner
-
   if (state.isLoading) {
-    episodeCount.textContent = "Loading episodes...";
+    countElem.textContent = "Loading data...";
     const loadingElem = document.createElement("div");
     loadingElem.className = "status-message loading";
     loadingElem.innerHTML = `
-      <p>⌛ Loading episodes, please wait...</p>
+      <p>⌛ Loading data, please wait...</p>
     `;
-    rootElem.append(loadingElem);
+    cardsContainer.append(loadingElem);
     return;
   }
+
+  if (state.viewMode === "shows") {
+    cardsContainer.classList.remove("episodes-grid");
+    const showCards = state.shows.map(displayShowCard);
+    cardsContainer.append(...showCards);
+    countElem.textContent = `Displaying ${state.shows.length} shows`;
+    return;
+  }
+
+  cardsContainer.classList.add("episodes-grid");
 
   let filteredEpisodes = state.episodes;
 
@@ -130,12 +162,8 @@ function render() {
   }
 
   const episodeCards = filteredEpisodes.map(displayEpisodeCard);
-
-  //add the newly created cards
-  rootElem.append(...episodeCards);
-
-  //display the number of current search match
-  episodeCount.textContent = `Displaying ${filteredEpisodes.length} of ${state.episodes.length} episodes`;
+  cardsContainer.append(...episodeCards);
+  countElem.textContent = `Displaying ${filteredEpisodes.length} of ${state.episodes.length} episodes`;
 }
 
 // -----------------------------------------------------
@@ -273,29 +301,15 @@ clearSearchBtn.addEventListener("click", () => {
 render(); // Render loading state immediately while fetching
 
 fetchAllShows()
-  .then(async (shows) => {
+  .then((shows) => {
     // Sort shows alphabetically once and store in state
     state.shows = shows.sort((a, b) =>
       a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
     );
     populateShowSelector();
 
-    // Pick the first show for the default
-    if (state.shows.length > 0) {
-      const defaultShow = state.shows[0];
-      state.selectedShowId = defaultShow.id;
-
-      // Update dropdown selection in UI
-      showSelector.value = defaultShow.id;
-
-      // Fetch and cache episodes for default show
-      const episodes = await fetchAllEpisodes(defaultShow.id);
-      state.episodeCache[defaultShow.id] = episodes;
-      state.episodes = episodes;
-    }
-
+    state.viewMode = "shows";
     state.isLoading = false;
-    populateEpisodeSelector();
     render();
   })
   .catch((error) => {
