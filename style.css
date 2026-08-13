@@ -8,7 +8,7 @@ body {
   margin: 0;
 }
 
-#root {
+#cards-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(20rem, 100%), 1fr));
   justify-content: center;
@@ -119,7 +119,7 @@ footer {
     margin: 0;
   }
 
-  #root {
+  #cards-container {
     padding: 1rem;
   }
 }

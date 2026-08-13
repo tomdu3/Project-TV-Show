@@ -78,7 +78,7 @@ function displayEpisodeCard(episode) {
 // RENDER
 // -----------------------------------------------------
 function render() {
-  const rootElem = document.getElementById("root");
+  const rootElem = document.getElementById("cards-container");
   const episodeCount = document.getElementById("episode-count");
 
   rootElem.textContent = "";
